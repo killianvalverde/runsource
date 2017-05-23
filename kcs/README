@@ -1,0 +1,51 @@
+KCS platform-independent library
+================================
+
+KCS is a cross-platform C++ library.
+
+
+Legal Stuff
+-----------
+
+. KCS 0.1
+  Copyright (C) 2017 Killian Poulaud.
+  License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+  This is free software: you are free to change and redistribute it.
+  There is NO WARRANTY, to the extent permitted by law.
+
+  Written by Killian Poulaud.
+
+  
+Warnings
+--------
+
+. In order to compile this software you have to use a C++ revision equal or
+  highter to C++14 (ISO/IEC 14882:2014).
+
+
+Building
+--------
+
+. Build it:
+
+    cmake .
+    cmake --build_ .
+
+  Library will be placed in "./lib" directory.
+
+
+Documentation
+-------------
+
+. Generate documentation:
+
+    doxygen Doxyfile
+    
+  Documentation will be placed in "./doc" directory.
+
+
+Installation
+------------
+
+. Once compiled, to install the library you have to copy and paste in your 
+  environment "./lib" and "./include" directories.
