@@ -17,5 +17,5 @@ set(SOURCE_FILES
         language.hpp
         )
 
-add_executable(autorun ${SOURCE_FILES})
-target_link_libraries(autorun kcs -lstdc++fs)
+add_executable(runsource ${SOURCE_FILES})
+target_link_libraries(runsource kcs -lstdc++fs)

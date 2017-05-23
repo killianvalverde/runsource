@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(autorun_test)
+project(runsource_test)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -20,7 +20,7 @@ set(SOURCE_FILES
         ../src/language.hpp
         )
 
-add_executable(autorun_test ${SOURCE_FILES})
+add_executable(runsource_test ${SOURCE_FILES})
 
-target_link_libraries(autorun_test gtest gtest_main)
-target_link_libraries(autorun_test kcs)
+target_link_libraries(runsource_test gtest gtest_main)
+target_link_libraries(runsource_test kcs)
