@@ -15,14 +15,14 @@
    along with KCS. If not, see <http://www.gnu.org/licenses/>. */
 
 /**
- * @file        kcs/system/system.hpp
- * @brief       system fonctions header.
+ * @file        kcs/system/process.hpp
+ * @brief       process fonctions header.
  * @author      Killian
  * @date        2017/01/08 - 16:37
  */
 
-#ifndef KCS_SYSTEM_SYSTEM_HPP
-#define KCS_SYSTEM_SYSTEM_HPP
+#ifndef KCS_SYSTEM_PROCESS_HPP
+#define KCS_SYSTEM_PROCESS_HPP
 
 #ifdef __unix__
 #include <sys/stat.h>

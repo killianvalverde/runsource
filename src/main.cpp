@@ -2,15 +2,18 @@
 #include <experimental/filesystem>
 
 #include "kcs/argparse.hpp"
+#include "kcs/system.hpp"
 #include "runbuild_task.hpp"
 
 namespace stdfs = std::experimental::filesystem;
 namespace kap = kcs::argparse;
+namespace ksys = kcs::system;
 
 
 int main(int argc, char *argv[])
 {
     kap::arg_parser ap("runsource");
+    int result;
     
     ap.add_help_text("The folowind options are set by defautl: -e -c11 -c++17\nOptions:");
     ap.add_key_arg({"--exec", "-e"}, "Execute the specified source file.");
@@ -35,13 +38,19 @@ int main(int argc, char *argv[])
     ap.add_help_arg({"--help"}, "Display this help and exit.");
     ap.add_gplv3_version_arg({"--version"}, "Output vesion information and exit", "1.0", "2017",
                              "Killian");
+    ap.add_key_arg({"--pause", "-p"}, "Pause the program before exit.");
     ap.add_foreign_arg("SOURCE-FILE", "Source file", "The source file path.", {kap::avt_t::R_FILE},
                        1u, ~0u);
     
     ap.parse_args((unsigned int)argc, argv);
     
     runsource::runbuild_task rbtask(ap);
-    rbtask.do_operation();
+    result = rbtask.do_operation();
     
-    return 0;
+    if (ap.arg_found("--pause"))
+    {
+        ksys::pause("Press key to continue....");
+    }
+    
+    return result;
 }

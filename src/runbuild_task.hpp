@@ -1,9 +1,9 @@
 //
-// Created by dragonfly on 22/05/17.
+// Created by Killian on 22/05/17.
 //
 
-#ifndef AUTORUN_AUTORUN_HPP
-#define AUTORUN_AUTORUN_HPP
+#ifndef RUNSOURCE_RUNBUILD_TASK_HPP
+#define RUNSOURCE_RUNBUILD_TASK_HPP
 
 #include <experimental/filesystem>
 #include <unordered_set>

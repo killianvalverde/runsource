@@ -25,7 +25,7 @@
 #define KCS_LOWLEVEL_HPP
 
 #include "lowlevel/arithmetic_operations.hpp"
-#include "kcs/lowlevel/flags_container.hpp"
+#include "lowlevel/flags_container.hpp"
 #include "lowlevel/enum_bitwise_operators.hpp"
 
 

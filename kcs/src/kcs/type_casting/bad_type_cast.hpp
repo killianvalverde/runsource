@@ -24,7 +24,7 @@
 #ifndef KCS_TYPE_CASTING_BAD_TYPE_CAST_HPP
 #define KCS_TYPE_CASTING_BAD_TYPE_CAST_HPP
 
-#include "kcs/exception/exception_base.hpp"
+#include "../exception/exception_base.hpp"
 
 
 namespace kcs {

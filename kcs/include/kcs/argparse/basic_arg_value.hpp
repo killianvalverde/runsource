@@ -34,7 +34,7 @@
 #include "../lowlevel/flags_container.hpp"
 #include "../iostream/basic_ostream.hpp"
 #include "../stringutils/stringutils.hpp"
-#include "../system/system.hpp"
+#include "../system/process.hpp"
 #include "../type_casting/type_cast.hpp"
 #include "arg_error_flags.hpp"
 #include "arg_flags.hpp"
@@ -469,7 +469,7 @@ private:
      *              not throw exception.
      */
     template<typename T>
-    inline std::enable_if_t<
+    std::enable_if_t<
             !kcs::type_traits::is_path<T>::value,
             bool
     >
@@ -478,12 +478,12 @@ private:
         if (std::is_arithmetic<T>::value)
         {
             if (composite_flags_.flag_is_raised(arg_flags::ALLOW_MIN_CONSTANT) &&
-                    kcs::stringutils::strcmp(value_, "min") == 0)
+                kcs::stringutils::strcmp(value_, "min") == 0)
             {
                 return true;
             }
             else if (composite_flags_.flag_is_raised(arg_flags::ALLOW_MAX_CONSTANT) &&
-                    kcs::stringutils::strcmp(value_, "max") == 0)
+                     kcs::stringutils::strcmp(value_, "max") == 0)
             {
                 return true;
             }

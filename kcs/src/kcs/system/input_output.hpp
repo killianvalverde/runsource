@@ -15,26 +15,26 @@
    along with KCS. If not, see <http://www.gnu.org/licenses/>. */
 
 /**
- * @file        kcs/system.hpp
- * @brief       system fonctions header.
+ * @file        kcs/system/input_output.hpp
+ * @brief       input and output fonctions header.
  * @author      Killian
- * @date        2017/01/08 - 16:37
+ * @date        2017/05/23 - 15:30
  */
 
-#ifndef KCS_SYSTEM_HPP
-#define KCS_SYSTEM_HPP
-
-#include "system/input_output.hpp"
-#include "system/process.hpp"
+#ifndef KCS_SYSTEM_INPUT_OUTPUT_HPP
+#define KCS_SYSTEM_INPUT_OUTPUT_HPP
 
 
 namespace kcs {
+namespace system {
 
 
 /**
- * @brief       Contains resources for interact with the system.
+ * @brief       Print a message and pause de program execution until a key is pressed
+ * @param       message : The message to print before the pause process. If a null pointer is used
+ *              there will be no message printed.
  */
-namespace system {
+void pause(const char *message);
 
 
 }

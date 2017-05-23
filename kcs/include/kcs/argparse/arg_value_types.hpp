@@ -26,7 +26,7 @@
 
 #include <ostream>
 
-#include "kcs/lowlevel/enum_bitwise_operators.hpp"
+#include "../lowlevel/enum_bitwise_operators.hpp"
 
 
 namespace kcs {

@@ -28,7 +28,7 @@
 #include <unordered_set>
 
 #include "../filesystem/filesystem.hpp"
-#include "kcs/lowlevel/flags_container.hpp"
+#include "../lowlevel/flags_container.hpp"
 #include "../stringutils/stringutils.hpp"
 #include "arg_parser_error_flags.hpp"
 #include "arg_parser_flags.hpp"
@@ -1540,13 +1540,13 @@ public:
     
     /**
      * @brief       Allows knowing wether an argument has been found in the program call.
-     * @param       id : Argument id to check.
+     * @param       key : Argument key to check.
      * @return      If function was successful true is returned, otherwise false is returned.
      */
-    bool arg_found(const string_type& id) const noexcept
+    bool arg_found(const string_type& key) const noexcept
     {
-        base_arg_type *base_arg = get_base_arg_reference(id);
-        return (base_arg->check_key(id) && base_arg->was_found());
+        base_arg_type *base_arg = get_base_arg_reference(key);
+        return (base_arg->check_key(key) && base_arg->was_found());
     }
     
     /**

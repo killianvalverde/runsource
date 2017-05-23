@@ -15,30 +15,41 @@
    along with KCS. If not, see <http://www.gnu.org/licenses/>. */
 
 /**
- * @file        kcs/system.hpp
- * @brief       system fonctions header.
+ * @file        kcs/iostream/stdio.cpp
+ * @brief       stdio fonctions source.
  * @author      Killian
- * @date        2017/01/08 - 16:37
+ * @date        2016/08/24 - 09:50
  */
 
-#ifndef KCS_SYSTEM_HPP
-#define KCS_SYSTEM_HPP
-
-#include "system/input_output.hpp"
-#include "system/process.hpp"
+#include <cstdarg>
+#include <cstdio>
+#include <cwchar>
 
 
 namespace kcs {
+namespace iostream {
 
 
-/**
- * @brief       Contains resources for interact with the system.
- */
-namespace system {
+int printf(const char* format, ...) noexcept
+{
+    int done;
+    va_list args;
+    va_start(args, format);
+    done = vfprintf(stdout, format, args);
+    va_end(args);
+    return done;
+}
 
+
+int printf(const wchar_t* format, ...) noexcept
+{
+    int done;
+    va_list args;
+    va_start(args, format);
+    done = vfwprintf(stdout, format, args);
+    va_end(args);
+    return done;
+}
 
 }
 }
-
-
-#endif

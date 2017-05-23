@@ -24,7 +24,7 @@
 #ifndef KCS_ARGPARSE_ARG_PARSER_EXCEPTION_HPP
 #define KCS_ARGPARSE_ARG_PARSER_EXCEPTION_HPP
 
-#include "kcs/exception/exception_base.hpp"
+#include "../exception/exception_base.hpp"
 
 
 namespace kcs {

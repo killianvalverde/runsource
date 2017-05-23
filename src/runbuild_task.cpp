@@ -1,5 +1,5 @@
 //
-// Created by dragonfly on 22/05/17.
+// Created by Killian on 22/05/17.
 //
 
 #include <iomanip>
@@ -210,13 +210,12 @@ int runbuild_task::exec_c() const
         
         strstream << "Process exited after "
                   << std::setprecision(3) << total_duration
-                  << " seconds with return value " << exec_result
-                  << std::endl;
+                  << " seconds with return value " << exec_result;
         
         strstream_str = strstream.str();
         
-        std::cout << "\n\n";
-        for (std::size_t i = 0; i < strstream_str.size() - 1; i++)
+        std::cout << "\n";
+        for (std::size_t i = 0; i < strstream_str.size(); i++)
         {
             std::cout << "-";
         }
@@ -315,13 +314,12 @@ int runbuild_task::exec_cpp() const
         
         strstream << "Process exited after "
                   << std::setprecision(3) << total_duration
-                  << " seconds with return value " << exec_result
-                  << std::endl;
+                  << " seconds with return value " << exec_result;
         
         strstream_str = strstream.str();
         
-        std::cout << "\n\n";
-        for (std::size_t i = 0; i < strstream_str.size() - 1; i++)
+        std::cout << "\n";
+        for (std::size_t i = 0; i < strstream_str.size(); i++)
         {
             std::cout << "-";
         }

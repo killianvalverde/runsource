@@ -24,7 +24,8 @@
 #ifndef KCS_SYSTEM_HPP
 #define KCS_SYSTEM_HPP
 
-#include "system/system.hpp"
+#include "system/input_output.hpp"
+#include "system/process.hpp"
 
 
 namespace kcs {

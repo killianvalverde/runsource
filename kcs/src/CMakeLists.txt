@@ -41,7 +41,7 @@ set(SOURCE_FILES
         kcs/argparse/basic_arg_key.hpp
         kcs/argparse/arg_error_flags.hpp
         kcs/argparse/arg_parser_error_flags.hpp
-        kcs/system/system.hpp
+        kcs/system/process.hpp
         kcs/system.hpp
         kcs/math.hpp
         kcs/math/math.hpp
@@ -52,7 +52,7 @@ set(SOURCE_FILES
         kcs/type_casting/c_string_to_floating_point.hpp
         kcs/type_casting/c_string_to_path.hpp
         kcs/iostream/stdio.cpp
-        kcs/filesystem/filesystem.cpp kcs/argparse/ibasic_help_text.hpp kcs/iostream/basic_ostream.hpp kcs/iostream/basic_ios_redirect.hpp)
+        kcs/filesystem/filesystem.cpp kcs/argparse/ibasic_help_text.hpp kcs/iostream/basic_ostream.hpp kcs/iostream/basic_ios_redirect.hpp kcs/system/input_output.hpp kcs/system/input_output.cpp)
 
 add_library(kcs STATIC ${SOURCE_FILES})
 

@@ -15,30 +15,47 @@
    along with KCS. If not, see <http://www.gnu.org/licenses/>. */
 
 /**
- * @file        kcs/system.hpp
- * @brief       system fonctions header.
+ * @file        kcs/system/input_output.cpp
+ * @brief       input and output fonctions source.
  * @author      Killian
- * @date        2017/01/08 - 16:37
+ * @date        2017/05/23 - 15:30
  */
 
-#ifndef KCS_SYSTEM_HPP
-#define KCS_SYSTEM_HPP
+#include <stdio.h>
+#ifdef __unix__
+#include <termios.h>
+#include <unistd.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#endif
 
-#include "system/input_output.hpp"
-#include "system/process.hpp"
+#include "input_output.hpp"
 
 
 namespace kcs {
-
-
-/**
- * @brief       Contains resources for interact with the system.
- */
 namespace system {
 
 
-}
-}
-
-
+void pause(const char *message)
+{
+#if _POSIX_VERSION >= 200112L
+    static struct termios oldt, newt;
+    if (message != nullptr)
+    {
+        //printf("Press key to continue....\n");
+        printf("%s\n", message);
+    }
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+#else
+#error "system not supported"
 #endif
+}
+
+
+}
+}

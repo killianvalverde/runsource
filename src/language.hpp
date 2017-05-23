@@ -1,9 +1,9 @@
 //
-// Created by dragonfly on 22/05/17.
+// Created by Killian on 22/05/17.
 //
 
-#ifndef AUTORUN_LANGUAGE_HPP
-#define AUTORUN_LANGUAGE_HPP
+#ifndef RUNSOURCE_LANGUAGE_HPP
+#define RUNSOURCE_LANGUAGE_HPP
 
 
 namespace runsource {
