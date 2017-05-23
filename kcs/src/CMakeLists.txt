@@ -52,7 +52,13 @@ set(SOURCE_FILES
         kcs/type_casting/c_string_to_floating_point.hpp
         kcs/type_casting/c_string_to_path.hpp
         kcs/iostream/stdio.cpp
-        kcs/filesystem/filesystem.cpp kcs/argparse/ibasic_help_text.hpp kcs/iostream/basic_ostream.hpp kcs/iostream/basic_ios_redirect.hpp kcs/system/input_output.hpp kcs/system/input_output.cpp)
+        kcs/filesystem/filesystem.cpp 
+        kcs/argparse/ibasic_help_text.hpp 
+        kcs/iostream/basic_ostream.hpp 
+        kcs/iostream/basic_ios_redirect.hpp 
+        kcs/system/input_output.hpp 
+        kcs/system/input_output.cpp
+        )
 
 add_library(kcs STATIC ${SOURCE_FILES})
 

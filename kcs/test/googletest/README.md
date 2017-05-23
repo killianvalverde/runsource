@@ -3,15 +3,15 @@
 
 #### Setup ####
 
-To build_ Google Test and your tests that use it, you need to tell your
-build_ system where to find its headers and source files.  The exact
-way to do it depends on which build_ system you use, and is usually
+To build Google Test and your tests that use it, you need to tell your
+build system where to find its headers and source files.  The exact
+way to do it depends on which build system you use, and is usually
 straightforward.
 
 #### Build ####
 
-Suppose you put Google Test in directory `${GTEST_DIR}`.  To build_ it,
-create a library build_ target (or a project as called by Visual Studio
+Suppose you put Google Test in directory `${GTEST_DIR}`.  To build it,
+create a library build target (or a project as called by Visual Studio
 and Xcode) to compile
 
     ${GTEST_DIR}/src/gtest-all.cc
@@ -34,10 +34,10 @@ with gtest and any other necessary libraries:
         -o your_test
 
 As an example, the make/ directory contains a Makefile that you can
-use to build_ Google Test on systems where GNU make is available
-(e.g. Linux, Mac OS X, and Cygwin).  It doesn't try to build_ Google
+use to build Google Test on systems where GNU make is available
+(e.g. Linux, Mac OS X, and Cygwin).  It doesn't try to build Google
 Test's own tests.  Instead, it just builds the Google Test library and
-a sample test.  You can use it as a starting point for your own build_
+a sample test.  You can use it as a starting point for your own build
 script.
 
 If the default settings are correct for your environment, the
@@ -53,35 +53,35 @@ it.
 
 ### Using CMake ###
 
-Google Test comes with a CMake build_ script (
+Google Test comes with a CMake build script (
 [CMakeLists.txt](CMakeLists.txt)) that can be used on a wide range of platforms ("C" stands for
 cross-platform.). If you don't have CMake installed already, you can
 download it for free from <http://www.cmake.org/>.
 
-CMake works by generating native makefiles or build_ projects that can
+CMake works by generating native makefiles or build projects that can
 be used in the compiler environment of your choice.  You can either
-build_ Google Test as a standalone project or it can be incorporated
-into an existing CMake build_ for another project.
+build Google Test as a standalone project or it can be incorporated
+into an existing CMake build for another project.
 
 #### Standalone CMake Project ####
 
 When building Google Test as a standalone project, the typical
 workflow starts with:
 
-    mkdir mybuild       # Create a directory to hold the build_ output.
+    mkdir mybuild       # Create a directory to hold the build output.
     cd mybuild
-    cmake ${GTEST_DIR}  # Generate native build_ scripts.
+    cmake ${GTEST_DIR}  # Generate native build scripts.
 
-If you want to build_ Google Test's samples, you should replace the
+If you want to build Google Test's samples, you should replace the
 last command with
 
     cmake -Dgtest_build_samples=ON ${GTEST_DIR}
 
 If you are on a \*nix system, you should now see a Makefile in the
-current directory.  Just type 'make' to build_ gtest.
+current directory.  Just type 'make' to build gtest.
 
 If you use Windows and have Visual Studio installed, a `gtest.sln` file
-and several `.vcproj` files will be created.  You can then build_ them
+and several `.vcproj` files will be created.  You can then build them
 using Visual Studio.
 
 On Mac OS X with Xcode installed, a `.xcodeproj` file will be generated.
@@ -89,15 +89,15 @@ On Mac OS X with Xcode installed, a `.xcodeproj` file will be generated.
 #### Incorporating Into An Existing CMake Project ####
 
 If you want to use gtest in a project which already uses CMake, then a
-more robust and flexible approach is to build_ gtest as part of that
+more robust and flexible approach is to build gtest as part of that
 project directly. This is done by making the GoogleTest source code
-available to the main build_ and adding it using CMake's
+available to the main build and adding it using CMake's
 `add_subdirectory()` command. This has the significant advantage that
 the same compiler and linker settings are used between gtest and the
 rest of your project, so issues associated with using incompatible
 libraries (eg debug/release), etc. are avoided. This is particularly
 useful on Windows. Making GoogleTest's source code available to the
-main build_ can be done a few different ways:
+main build can be done a few different ways:
 
 * Download the GoogleTest source code manually and place it at a
   known location. This is the least flexible approach and can get
@@ -109,15 +109,15 @@ main build_ can be done a few different ways:
 * Add GoogleTest as a git submodule or equivalent. This may not
   always be possible or appropriate. Git submodules, for example,
   have their own set of advantages and drawbacks.
-* Use CMake to download GoogleTest as part of the build_'s configure
+* Use CMake to download GoogleTest as part of the build's configure
   step. This is just a little more complex, but doesn't have the
   limitations of the other methods.
 
 The last of the above methods is implemented with a small piece
 of CMake code in a separate file (e.g. `CMakeLists.txt.in`) which
-is copied to the build_ area and then invoked as a sub-build_
+is copied to the build area and then invoked as a sub-build
 _during the CMake stage_. That directory is then pulled into the
-main build_ with `add_subdirectory()`. For example:
+main build with `add_subdirectory()`. For example:
 
 New file `CMakeLists.txt.in`:
 
@@ -130,14 +130,14 @@ New file `CMakeLists.txt.in`:
       GIT_REPOSITORY    https://github.com/google/googletest.git
       GIT_TAG           master
       SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
-      BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build_"
+      BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
       CONFIGURE_COMMAND ""
       BUILD_COMMAND     ""
       INSTALL_COMMAND   ""
       TEST_COMMAND      ""
     )
     
-Existing build_'s `CMakeLists.txt`:
+Existing build's `CMakeLists.txt`:
 
     # Download and unpack googletest at configure time
     configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -147,7 +147,7 @@ Existing build_'s `CMakeLists.txt`:
     if(result)
       message(FATAL_ERROR "CMake step for googletest failed: ${result}")
     endif()
-    execute_process(COMMAND ${CMAKE_COMMAND} --build_ .
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
       RESULT_VARIABLE result
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
     if(result)
@@ -158,10 +158,10 @@ Existing build_'s `CMakeLists.txt`:
     # settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     
-    # Add googletest directly to our build_. This defines
+    # Add googletest directly to our build. This defines
     # the gtest and gtest_main targets.
     add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
-                     ${CMAKE_BINARY_DIR}/googletest-build_)
+                     ${CMAKE_BINARY_DIR}/googletest-build)
 
     # The gtest/gtest_main targets carry header search path
     # dependencies automatically when using CMake 2.8.11 or
@@ -185,18 +185,18 @@ of the technique.
 
 ### Legacy Build Scripts ###
 
-Before settling on CMake, we have been providing hand-maintained build_
+Before settling on CMake, we have been providing hand-maintained build
 projects/scripts for Visual Studio, Xcode, and Autotools.  While we
 continue to provide them for convenience, they are not actively
 maintained any more.  We highly recommend that you follow the
 instructions in the above sections to integrate Google Test
-with your existing build_ system.
+with your existing build system.
 
-If you still need to use the legacy build_ scripts, here's how:
+If you still need to use the legacy build scripts, here's how:
 
 The msvc\ folder contains two solutions with Visual C++ projects.
 Open the `gtest.sln` or `gtest-md.sln` file using Visual Studio, and you
-are ready to build_ Google Test the same way you build_ any Visual
+are ready to build Google Test the same way you build any Visual
 Studio project.  Files that have names ending with -md use DLL
 versions of Microsoft runtime libraries (the /MD or the /MDd compiler
 option).  Files without that suffix use static versions of the runtime
@@ -207,14 +207,14 @@ the default for new projects in these versions of Visual Studio.
 
 On Mac OS X, open the `gtest.xcodeproj` in the `xcode/` folder using
 Xcode.  Build the "gtest" target.  The universal binary framework will
-end up in your selected build_ directory (selected in the Xcode
-"Preferences..." -> "Building" pane and defaults to xcode/build_).
+end up in your selected build directory (selected in the Xcode
+"Preferences..." -> "Building" pane and defaults to xcode/build).
 Alternatively, at the command line, enter:
 
     xcodebuild
 
-This will build_ the "Release" configuration of gtest.framework in your
-default build_ location.  See the "xcodebuild" man page for more
+This will build the "Release" configuration of gtest.framework in your
+default build location.  See the "xcodebuild" man page for more
 information about building different configurations and building in
 different locations.
 
@@ -289,13 +289,13 @@ or
 When Google Test uses pthread, you may need to add flags to your
 compiler and/or linker to select the pthread library, or you'll get
 link errors.  If you use the CMake script or the deprecated Autotools
-script, this is taken care of for you.  If you use your own build_
+script, this is taken care of for you.  If you use your own build
 script, you'll need to read your compiler and linker's manual to
 figure out what flags to add.
 
 ### As a Shared Library (DLL) ###
 
-Google Test is compact, so most users can build_ and link it as a
+Google Test is compact, so most users can build and link it as a
 static library for the simplicity.  You can choose to use Google Test
 as a shared library (known as a DLL on Windows) if you prefer.
 
@@ -319,7 +319,7 @@ future, if we decide to improve the speed of loading the library (see
 <http://gcc.gnu.org/wiki/Visibility> for details).  Therefore you are
 recommended to always add the above flags when using Google Test as a
 shared library.  Otherwise a future release of Google Test may break
-your build_ script.
+your build script.
 
 ### Avoiding Macro Name Clashes ###
 
@@ -369,7 +369,7 @@ executable can be found:
 
     cmake -DPYTHON_EXECUTABLE=path/to/python -Dgtest_build_tests=ON ${GTEST_DIR}
 
-Next, you can build_ Google Test and all of its own tests.  On \*nix,
+Next, you can build Google Test and all of its own tests.  On \*nix,
 this is usually done by 'make'.  To run the tests, do
 
     make test

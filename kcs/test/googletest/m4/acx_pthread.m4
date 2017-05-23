@@ -10,9 +10,9 @@
 
 dnl @synopsis ACX_PTHREAD([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
-dnl @summary figure out how to build_ C programs using POSIX threads
+dnl @summary figure out how to build C programs using POSIX threads
 dnl
-dnl This macro figures out how to build_ C programs using POSIX threads.
+dnl This macro figures out how to build C programs using POSIX threads.
 dnl It sets the PTHREAD_LIBS output variable to the threads library and
 dnl linker flags, and the PTHREAD_CFLAGS output variable to any special
 dnl C compiler flags that are needed. (The user can also force certain

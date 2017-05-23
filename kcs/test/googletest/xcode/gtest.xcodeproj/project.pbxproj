@@ -28,7 +28,7 @@
 			buildPhases = (
 				40C44ADB0E3798F4008FCC51 /* Generate Version.h */,
 			);
-			comments = "The generation of Version.h must be performed in its own target. Since the Info.plist is preprocessed before any of the other build_ phases in gtest, the Version.h file would not be ready if included as a build_ phase of that target.";
+			comments = "The generation of Version.h must be performed in its own target. Since the Info.plist is preprocessed before any of the other build phases in gtest, the Version.h file would not be ready if included as a build phase of that target.";
 			dependencies = (
 			);
 			name = "Version Info";
@@ -639,7 +639,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Remember, this \"Run Script\" build_ phase will be executed from $SRCROOT\n/bin/bash Scripts/runtests.sh";
+			shellScript = "# Remember, this \"Run Script\" build phase will be executed from $SRCROOT\n/bin/bash Scripts/runtests.sh";
 		};
 		40C44ADB0E3798F4008FCC51 /* Generate Version.h */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -656,7 +656,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Remember, this \"Run Script\" build_ phase will be executed from $SRCROOT\n/usr/bin/python Scripts/versiongenerate.py ../ $PROJECT_TEMP_DIR";
+			shellScript = "# Remember, this \"Run Script\" build phase will be executed from $SRCROOT\n/usr/bin/python Scripts/versiongenerate.py ../ $PROJECT_TEMP_DIR";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -293,7 +293,7 @@ maintainer-clean-local:
 	rm -rf "$(srcdir)/fused-src"
 endif
 
-# Death tests may produce core dumps in the build_ directory. In case
+# Death tests may produce core dumps in the build directory. In case
 # this happens, clean them to keep distcleancheck happy.
 CLEANFILES = core
 
@@ -302,9 +302,9 @@ CLEANFILES = core
 # One-Definition Rule.
 
 install-exec-local:
-	echo "'get install' is dangerous and not supported. Instead, see README for how to integrate Google Test into your build_ system."
+	echo "'get install' is dangerous and not supported. Instead, see README for how to integrate Google Test into your build system."
 	false
 
 install-data-local:
-	echo "'get install' is dangerous and not supported. Instead, see README for how to integrate Google Test into your build_ system."
+	echo "'get install' is dangerous and not supported. Instead, see README for how to integrate Google Test into your build system."
 	false

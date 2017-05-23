@@ -27,7 +27,7 @@ list can help you decide whether it is for you too.
   * Death tests are pretty handy for ensuring that your asserts in production code are triggered by the right conditions.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
-  * Google Test can generate XML test result reports that can be parsed by popular continuous build_ system like Hudson.
+  * Google Test can generate XML test result reports that can be parsed by popular continuous build system like Hudson.
   * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [global test environments](V1_6_AdvancedGuide.md#Global_Set-Up_and_Tear-Down) and tests parameterized by [values](V1_6_AdvancedGuide.md#value-parameterized-tests) or [types](V1_6_AdvancedGuide.md#typed-tests), Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
     * expand your testing vocabulary by defining [custom predicates](V1_6_AdvancedGuide.md#predicate-assertions-for-better-error-messages),
     * teach Google Test how to [print your types](V1_6_AdvancedGuide.md#teaching-google-test-how-to-print-your-values),
@@ -138,7 +138,7 @@ platform dropdown, leave `Copy settings from` set to `Win32` and
 `Standard` toolbar, which allow you to toggle between building 32-bit or
 64-bit binaries (or both at once using Batch Build).
 
-In order to prevent build_ output files from overwriting one another,
+In order to prevent build output files from overwriting one another,
 you'll need to change the `Intermediate Directory` settings for the
 newly created platform configuration across all the projects. To do
 this, multi-select (e.g. using shift-click) all projects (but not the
@@ -148,8 +148,8 @@ and from the `Configuration` dropdown, select `All Configurations`.
 Make sure the selected platform is `x64`. For the
 `Intermediate Directory` setting, change the value from
 `$(PlatformName)\$(ConfigurationName)` to
-`$(OutDir)\$(ProjectName)`. Click `OK` and then build_ the
-solution. When the build_ is complete, the 64-bit binaries will be in
+`$(OutDir)\$(ProjectName)`. Click `OK` and then build the
+solution. When the build is complete, the 64-bit binaries will be in
 the `msvc\x64\Debug` directory.
 
 ## Can I use Google Test on MinGW? ##
@@ -211,7 +211,7 @@ combined. Therefore we want to invest more in the matchers than in the
 
 ## Does Google Test support running tests in parallel? ##
 
-Test runners tend to be tightly coupled with the build_/test
+Test runners tend to be tightly coupled with the build/test
 environment, and Google Test doesn't try to solve the problem of
 running tests in parallel.  Instead, we tried to make Google Test work
 nicely with test runners.  For example, Google Test's XML report
@@ -756,7 +756,7 @@ lets you repeat your tests with different parameters, without defining it more t
 To test a `foo.cc` file, you need to compile and link it into your unit test
 program. However, when the file contains a definition for the `main()`
 function, it will clash with the `main()` of your unit test, and will result in
-a build_ error.
+a build error.
 
 The right solution is to split it into three files:
   1. `foo.h` which contains the declarations,
@@ -960,7 +960,7 @@ http://hassanjamilahmad.blogspot.com/2009/07/gtest-starters-help.html.
 
 ## I am seeing compile errors mentioning std::type\_traits when I try to use Google Test on Solaris. ##
 Google Test uses parts of the standard C++ library that SunStudio does not support.
-Our users reported success using alternative implementations. Try running the build_ after runing this commad:
+Our users reported success using alternative implementations. Try running the build after runing this commad:
 
 `export CC=cc CXX=CC CXXFLAGS='-library=stlport4'`
 

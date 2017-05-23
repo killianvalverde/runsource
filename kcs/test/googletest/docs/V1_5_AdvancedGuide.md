@@ -1885,7 +1885,7 @@ over from a previous run), Google Test will pick a different name (e.g.
 `foo_test_1.xml`) to avoid overwriting it.
 
 The report uses the format described here.  It is based on the
-`junitreport` Ant task and can be parsed by popular continuous build_
+`junitreport` Ant task and can be parsed by popular continuous build
 systems like [Hudson](https://hudson.dev.java.net/). Since that format
 was originally intended for Java, a little interpretation is required
 to get it apply to Google Test tests, as shown here:

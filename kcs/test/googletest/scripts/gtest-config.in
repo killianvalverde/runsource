@@ -15,7 +15,7 @@ show_help()
   cat <<\EOF
 
 The `gtest-config' script provides access to the necessary compile and linking
-flags to connect with Google C++ Testing Framework, both in a build_ prior to
+flags to connect with Google C++ Testing Framework, both in a build prior to
 installation, and on the system proper after installation. The installation
 overrides may be issued in combination with any other queries, but will only
 affect installation queries if called on a built but not installed gtest. The
@@ -199,7 +199,7 @@ libdir="${GTEST_LIBDIR:-@libdir@}"
 includedir="${GTEST_INCLUDEDIR:-@includedir@}"
 
 # We try and detect if our binary is not located at its installed location. If
-# it's not, we provide variables pointing to the source and build_ tree rather
+# it's not, we provide variables pointing to the source and build tree rather
 # than to the install tree. This allows building against a just-built gtest
 # rather than an installed gtest.
 bindir="@bindir@"
@@ -207,7 +207,7 @@ this_relative_bindir=`dirname $0`
 this_bindir=`cd ${this_relative_bindir}; pwd -P`
 if test "${this_bindir}" = "${this_bindir%${bindir}}"; then
   # The path to the script doesn't end in the bindir sequence from Autoconf,
-  # assume that we are in a build_ tree.
+  # assume that we are in a build tree.
   build_dir=`dirname ${this_bindir}`
   src_dir=`cd ${this_bindir}; cd @top_srcdir@; pwd -P`
 
@@ -217,9 +217,9 @@ if test "${this_bindir}" = "${this_bindir%${bindir}}"; then
   gtest_libs="${build_dir}/lib/libgtest.la @PTHREAD_CFLAGS@ @PTHREAD_LIBS@"
   gtest_ldflags=""
 
-  # We provide hooks to include from either the source or build_ dir, where the
-  # build_ dir is always preferred. This will potentially allow us to write
-  # build_ rules for generated headers and have them automatically be preferred
+  # We provide hooks to include from either the source or build dir, where the
+  # build dir is always preferred. This will potentially allow us to write
+  # build rules for generated headers and have them automatically be preferred
   # over provided versions.
   gtest_cppflags="-I${build_dir}/include -I${src_dir}/include"
   gtest_cxxflags="@PTHREAD_CFLAGS@"

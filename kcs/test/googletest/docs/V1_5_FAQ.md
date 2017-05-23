@@ -44,7 +44,7 @@ platform dropdown, leave `Copy settings from` set to `Win32` and
 `Standard` toolbar, which allow you to toggle between building 32-bit or
 64-bit binaries (or both at once using Batch Build).
 
-In order to prevent build_ output files from overwriting one another,
+In order to prevent build output files from overwriting one another,
 you'll need to change the `Intermediate Directory` settings for the
 newly created platform configuration across all the projects. To do
 this, multi-select (e.g. using shift-click) all projects (but not the
@@ -54,8 +54,8 @@ and from the `Configuration` dropdown, select `All Configurations`.
 Make sure the selected platform is `x64`. For the
 `Intermediate Directory` setting, change the value from
 `$(PlatformName)\$(ConfigurationName)` to
-`$(OutDir)\$(ProjectName)`. Click `OK` and then build_ the
-solution. When the build_ is complete, the 64-bit binaries will be in
+`$(OutDir)\$(ProjectName)`. Click `OK` and then build the
+solution. When the build is complete, the 64-bit binaries will be in
 the `msvc\x64\Debug` directory.
 
 ## Can I use Google Test on MinGW? ##
@@ -114,7 +114,7 @@ combined. Therefore we want to invest more in the matchers than in the
 
 ## Does Google Test support running tests in parallel? ##
 
-Test runners tend to be tightly coupled with the build_/test
+Test runners tend to be tightly coupled with the build/test
 environment, and Google Test doesn't try to solve the problem of
 running tests in parallel.  Instead, we tried to make Google Test work
 nicely with test runners.  For example, Google Test's XML report
@@ -659,7 +659,7 @@ lets you repeat your tests with different parameters, without defining it more t
 To test a `foo.cc` file, you need to compile and link it into your unit test
 program. However, when the file contains a definition for the `main()`
 function, it will clash with the `main()` of your unit test, and will result in
-a build_ error.
+a build error.
 
 The right solution is to split it into three files:
   1. `foo.h` which contains the declarations,

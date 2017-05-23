@@ -66,7 +66,7 @@ Changes for 1.5.0:
  * New feature: Google Test can now be compiled as a DLL.
  * New feature: fused source files are included.
  * New feature: prints help when encountering unrecognized Google Test flags.
- * Experimental feature: CMake build_ script (requires CMake 2.6.4+).
+ * Experimental feature: CMake build script (requires CMake 2.6.4+).
  * Experimental feature: the Pump script for meta programming.
  * double values streamed to an assertion are printed with enough precision
    to differentiate any two different values.
@@ -117,10 +117,10 @@ Changes for 1.2.1:
 
  * Compatibility fixes for Linux IA-64 and IBM z/OS.
  * Added support for using Boost and other TR1 implementations.
- * Changes to the build_ scripts to support upcoming release of Google C++
+ * Changes to the build scripts to support upcoming release of Google C++
    Mocking Framework.
  * Added Makefile to the distribution package.
- * Improved build_ instructions in README.
+ * Improved build instructions in README.
 
 Changes for 1.2.0:
 
