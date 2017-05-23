@@ -253,15 +253,19 @@ int runbuild_task::build_cpp(std::string output_name, bool verbose) const
     
     for (auto& x : files_)
     {
+        command += "\"";
         command += x.string();
+        command += "\"";
         command += ' ';
     }
     command += "-o ";
     
     if (output_name.empty())
     {
-        output_name = files_.front().string();
+        output_name += "\"";
+        output_name += files_.front().string();
         output_name = output_name.substr(0, output_name.find_last_of("."));
+        output_name += "\"";
     }
     command += std::move(output_name);
     
