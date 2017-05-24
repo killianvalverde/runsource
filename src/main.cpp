@@ -28,7 +28,10 @@ namespace ksys = kcs::system;
 
 int main(int argc, char *argv[])
 {
-    kap::arg_parser ap("runsource");
+    kap::arg_parser ap(kap::arg_parser::constructor_params::get()
+                               .program_name("runsource")
+                               .flags(kap::apf_t::DEFAULT_ARG_PARSER_FLAGS &
+                                      ~kap::apf_t::EXIT_ON_PRINT_ARGS_ERRORS));
     int result;
     
     ap.add_help_text("The folowind options are set by defautl: -gcc -e -c11 -c++17\nOptions:");
@@ -63,8 +66,11 @@ int main(int argc, char *argv[])
     
     ap.parse_args((unsigned int)argc, argv);
     
-    runsource::runbuild_task rbtask(ap);
-    result = rbtask.do_operation();
+    if (!ap.there_are_errors())
+    {
+        runsource::runbuild_task rbtask(ap);
+        result = rbtask.do_operation();
+    }
     
     if (ap.arg_found("--pause"))
     {

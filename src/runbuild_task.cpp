@@ -89,7 +89,7 @@ runbuild_task::runbuild_task(const kap::arg_parser& ap)
         {
             c_standard_ = "-std=c99";
         }
-        else //if (ap.arg_found("-c11"))
+        else //if (ap.arg_found("--c11"))
         {
             c_standard_ = "-std=c11";
         }
@@ -110,7 +110,7 @@ runbuild_task::runbuild_task(const kap::arg_parser& ap)
         {
             cpp_standard_ = "-std=c++14";
         }
-        else //if (ap.arg_found("-c++17"))
+        else //if (ap.arg_found("--c++17"))
         {
             cpp_standard_ = "-std=c++17";
         }
