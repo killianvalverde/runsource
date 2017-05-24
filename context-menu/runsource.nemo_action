@@ -12,4 +12,4 @@ Icon-Name=applications-development
 
 Selection=notnone
 
-Extensions=.c;.cpp;.cc;.c++;.cp;.cxx;
+Extensions=.c;.cpp;.cc;.c++;.cp;.cxx;.sh;.py;

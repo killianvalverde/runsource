@@ -27,6 +27,7 @@
 
 #include "kcs/argparse.hpp"
 #include "language.hpp"
+#include "tool_chain.hpp"
 
 namespace stdfs = std::experimental::filesystem;
 namespace kap = kcs::argparse;
@@ -41,16 +42,21 @@ public:
     runbuild_task(const kap::arg_parser& ap);
     bool is_c() const noexcept;
     bool is_cpp() const noexcept;
+    bool is_bash() const noexcept;
+    bool is_python() const noexcept;
     int do_operation() const;
 
 private:
-    int build_c(std::string output_name, bool verbose) const;
-    int exec_c() const;
-    int build_cpp(std::string output_name, bool verbose) const;
-    int exec_cpp() const;
+    int gcc_build_c(std::string output_name, bool verbose) const;
+    int gcc_exec_c() const;
+    int gcc_build_cpp(std::string output_name, bool verbose) const;
+    int gcc_exec_cpp() const;
+    int exec_bash() const;
+    int exec_python() const;
 
 private:
     std::vector<stdfs::path> files_;
+    tool_chain tool_chain_;
     bool build_;
     language language_;
     std::string c_standard_;
@@ -60,6 +66,8 @@ private:
     
     static std::unordered_set<std::string> c_extensions_;
     static std::unordered_set<std::string> cpp_extensions_;
+    static std::unordered_set<std::string> bash_extensions_;
+    static std::unordered_set<std::string> python_extensions_;
 };
 
 

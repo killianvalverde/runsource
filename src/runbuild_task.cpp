@@ -40,6 +40,8 @@ runbuild_task::runbuild_task(const kap::arg_parser& ap)
         files_.push_back(x.type_cast<stdfs::path>());
     }
     
+    tool_chain_ = tool_chain::GCC;
+    
     if (ap.arg_found("--clanguage"))
     {
         language_ = language::C;
@@ -47,6 +49,14 @@ runbuild_task::runbuild_task(const kap::arg_parser& ap)
     else if (ap.arg_found("--c++language"))
     {
         language_ = language::CPP;
+    }
+    else if (ap.arg_found("--bash"))
+    {
+        language_ = language::BASH;
+    }
+    else if (ap.arg_found("--python"))
+    {
+        language_ = language::PYTHON;
     }
     else if (is_c())
     {
@@ -56,43 +66,54 @@ runbuild_task::runbuild_task(const kap::arg_parser& ap)
     {
         language_ = language::CPP;
     }
-    
-    if (ap.arg_found("-c89"))
+    else if (is_python())
     {
-        c_standard_ = "-std=c89";
+        language_ = language::PYTHON;
     }
-    else if (ap.arg_found("-c90"))
+    else if (is_bash())
     {
-        c_standard_ = "-std=c90";
-    }
-    else if (ap.arg_found("-c99"))
-    {
-        c_standard_ = "-std=c99";
-    }
-    else //if (ap.arg_found("-c11"))
-    {
-        c_standard_ = "-std=c11";
+        language_ = language::BASH;
     }
     
-    if (ap.arg_found("-c++98"))
+    if (tool_chain_ == tool_chain::GCC)
     {
-        cpp_standard_ = "-std=c++98";
-    }
-    else if (ap.arg_found("-c++03"))
-    {
-        cpp_standard_ = "-std=c++03";
-    }
-    else if (ap.arg_found("-c++11"))
-    {
-        cpp_standard_ = "-std=c++11";
-    }
-    else if (ap.arg_found("-c++14"))
-    {
-        cpp_standard_ = "-std=c++14";
-    }
-    else //if (ap.arg_found("-c++17"))
-    {
-        cpp_standard_ = "-std=c++17";
+        if (ap.arg_found("--c89"))
+        {
+            c_standard_ = "-std=c89";
+        }
+        else if (ap.arg_found("--c90"))
+        {
+            c_standard_ = "-std=c90";
+        }
+        else if (ap.arg_found("--c99"))
+        {
+            c_standard_ = "-std=c99";
+        }
+        else //if (ap.arg_found("-c11"))
+        {
+            c_standard_ = "-std=c11";
+        }
+    
+        if (ap.arg_found("--c++98"))
+        {
+            cpp_standard_ = "-std=c++98";
+        }
+        else if (ap.arg_found("--c++03"))
+        {
+            cpp_standard_ = "-std=c++03";
+        }
+        else if (ap.arg_found("--c++11"))
+        {
+            cpp_standard_ = "-std=c++11";
+        }
+        else if (ap.arg_found("--c++14"))
+        {
+            cpp_standard_ = "-std=c++14";
+        }
+        else //if (ap.arg_found("-c++17"))
+        {
+            cpp_standard_ = "-std=c++17";
+        }
     }
     
     for (auto& x : ap.get_arg_values("--compiler-args", std::nothrow))
@@ -135,22 +156,64 @@ bool runbuild_task::is_cpp() const noexcept
 }
 
 
+bool runbuild_task::is_bash() const noexcept
+{
+    for (auto& x : files_)
+    {
+        if (bash_extensions_.count(x.extension()) == 0 && x.has_extension())
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+
+bool runbuild_task::is_python() const noexcept
+{
+    for (auto& x : files_)
+    {
+        if (python_extensions_.count(x.extension()) == 0)
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+
 int runbuild_task::do_operation() const
 {
     switch (language_)
     {
         case language::C:
-            return build_ ? build_c(std::string(), true) : exec_c();
+            if (tool_chain_ == tool_chain::GCC)
+            {
+                return build_ ? gcc_build_c(std::string(), true) : gcc_exec_c();
+            }
+            break;
         
         case language::CPP:
-            return build_ ? build_cpp(std::string(), true) : exec_cpp();
+            if (tool_chain_ == tool_chain::GCC)
+            {
+                return build_ ? gcc_build_cpp(std::string(), true) : gcc_exec_cpp();
+            }
+            break;
+    
+        case language::BASH:
+            return exec_bash();
+    
+        case language::PYTHON:
+            return exec_python();
     }
     
     return -1;
 }
 
 
-int runbuild_task::build_c(std::string output_name, bool verbose) const
+int runbuild_task::gcc_build_c(std::string output_name, bool verbose) const
 {
     std::clock_t start_time;
     double total_duration;
@@ -196,11 +259,11 @@ int runbuild_task::build_c(std::string output_name, bool verbose) const
 }
 
 
-int runbuild_task::exec_c() const
+int runbuild_task::gcc_exec_c() const
 {
     std::string output_name = std::tmpnam(nullptr);
     std::string command;
-    int build_result = build_c(output_name, false);
+    int build_result = gcc_build_c(output_name, false);
     int exec_result;
     std::clock_t start_time;
     double total_duration;
@@ -250,7 +313,7 @@ int runbuild_task::exec_c() const
 }
 
 
-int runbuild_task::build_cpp(std::string output_name, bool verbose) const
+int runbuild_task::gcc_build_cpp(std::string output_name, bool verbose) const
 {
     std::clock_t start_time;
     double total_duration;
@@ -300,11 +363,11 @@ int runbuild_task::build_cpp(std::string output_name, bool verbose) const
 }
 
 
-int runbuild_task::exec_cpp() const
+int runbuild_task::gcc_exec_cpp() const
 {
     std::string output_name = std::tmpnam(nullptr);
     std::string command;
-    int build_result = build_cpp(output_name, false);
+    int build_result = gcc_build_cpp(output_name, false);
     int exec_result;
     std::clock_t start_time;
     double total_duration;
@@ -354,12 +417,118 @@ int runbuild_task::exec_cpp() const
 }
 
 
+int runbuild_task::exec_bash() const
+{
+    std::string command = "bash ";
+    std::clock_t start_time;
+    double total_duration;
+    int exec_result;
+    std::stringstream strstream;
+    std::string strstream_str;
+    
+    for (auto& x : program_args_)
+    {
+        command += x;
+        command += ' ';
+    }
+    
+    for (auto& x : files_)
+    {
+        command += "\"";
+        command += x.string();
+        command += "\"";
+        command += ' ';
+    }
+    
+    start_time = clock();
+    exec_result = system(command.c_str());
+    total_duration = (clock() - start_time) / CLOCKS_PER_SEC;
+    
+    if (exec_result == 0)
+    {
+        strstream << "Process exited after "
+                  << std::setprecision(3) << total_duration
+                  << " seconds with return value " << exec_result;
+        
+        strstream_str = strstream.str();
+        
+        std::cout << "\n";
+        for (std::size_t i = 0; i < strstream_str.size(); i++)
+        {
+            std::cout << "-";
+        }
+        std::cout << "\n"
+                  << strstream_str
+                  << std::endl;
+    }
+    
+    return exec_result;
+}
+
+
+int runbuild_task::exec_python() const
+{
+    std::string command = "python ";
+    std::clock_t start_time;
+    double total_duration;
+    int exec_result;
+    std::stringstream strstream;
+    std::string strstream_str;
+    
+    for (auto& x : program_args_)
+    {
+        command += x;
+        command += ' ';
+    }
+    
+    for (auto& x : files_)
+    {
+        command += "\"";
+        command += x.string();
+        command += "\"";
+        command += ' ';
+    }
+    
+    start_time = clock();
+    exec_result = system(command.c_str());
+    total_duration = (clock() - start_time) / CLOCKS_PER_SEC;
+    
+    if (exec_result == 0)
+    {
+        strstream << "Process exited after "
+                  << std::setprecision(3) << total_duration
+                  << " seconds with return value " << exec_result;
+    
+        strstream_str = strstream.str();
+    
+        std::cout << "\n";
+        for (std::size_t i = 0; i < strstream_str.size(); i++)
+        {
+            std::cout << "-";
+        }
+        std::cout << "\n"
+                  << strstream_str
+                  << std::endl;
+    }
+    
+    return exec_result;
+}
+
+
 std::unordered_set<std::string> runbuild_task::c_extensions_ =
         {".c"};
 
 
 std::unordered_set<std::string> runbuild_task::cpp_extensions_ =
         {".cpp", ".cc", ".C", ".CPP", ".c++", ".cp", ".cxx"};
- 
 
+
+std::unordered_set<std::string> runbuild_task::bash_extensions_ =
+        {".sh"};
+
+
+std::unordered_set<std::string> runbuild_task::python_extensions_ =
+        {".py"};
+    
+    
 }

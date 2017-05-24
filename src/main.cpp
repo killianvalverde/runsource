@@ -31,20 +31,23 @@ int main(int argc, char *argv[])
     kap::arg_parser ap("runsource");
     int result;
     
-    ap.add_help_text("The folowind options are set by defautl: -e -c11 -c++17\nOptions:");
+    ap.add_help_text("The folowind options are set by defautl: -gcc -e -c11 -c++17\nOptions:");
+    ap.add_key_arg({"--gcc", "-gcc"}, "Use gcc tool chain for C and C++.");
     ap.add_key_arg({"--exec", "-e"}, "Execute the specified source file.");
     ap.add_key_arg({"--build", "-b"}, "Build the specified source file.");
-    ap.add_key_arg({"--clanguage", "-cl"}, "Force C language interpretation.");
+    ap.add_key_arg({"--clanguage", "-cln"}, "Force C language interpretation.");
     ap.add_key_arg({"--c++language", "-c++"}, "Force C++ language interpretation.");
-    ap.add_key_arg({"-c89"}, "Use C89 standard when C language is selected.");
-    ap.add_key_arg({"-c90"}, "Use C90 standard when C language is selected");
-    ap.add_key_arg({"-c99"}, "Use C99 standard when C language is selected");
-    ap.add_key_arg({"-c11"}, "Use C11 standard when C language is selected");
-    ap.add_key_arg({"-c++98"}, "Use C++98 standard when C++ language is selected.");
-    ap.add_key_arg({"-c++03"}, "Use C++03 standard when C++ language is selected.");
-    ap.add_key_arg({"-c++11"}, "Use C++11 standard when C++ language is selected.");
-    ap.add_key_arg({"-c++14"}, "Use C++14 standard when C++ language is selected.");
-    ap.add_key_arg({"-c++17"}, "Use C++17 standard when C++ language is selected.");
+    ap.add_key_arg({"--bash", "-bsh"}, "Force bash language interpretation.");
+    ap.add_key_arg({"--python", "-py"}, "Force python language interpretation.");
+    ap.add_key_arg({"--c89"}, "Use C89 standard when C language is selected.");
+    ap.add_key_arg({"--c90"}, "Use C90 standard when C language is selected");
+    ap.add_key_arg({"--c99"}, "Use C99 standard when C language is selected");
+    ap.add_key_arg({"--c11"}, "Use C11 standard when C language is selected");
+    ap.add_key_arg({"--c++98"}, "Use C++98 standard when C++ language is selected.");
+    ap.add_key_arg({"--c++03"}, "Use C++03 standard when C++ language is selected.");
+    ap.add_key_arg({"--c++11"}, "Use C++11 standard when C++ language is selected.");
+    ap.add_key_arg({"--c++14"}, "Use C++14 standard when C++ language is selected.");
+    ap.add_key_arg({"--c++17"}, "Use C++17 standard when C++ language is selected.");
     ap.add_key_value_arg({"--compiler-args", "-ca"},
                          "Forward the folowing arguments to the compiler.", {kap::avt_t::STRING},
                          1u, ~0u);

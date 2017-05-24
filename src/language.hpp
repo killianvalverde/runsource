@@ -29,7 +29,9 @@ enum class language
 {
     NIL,
     C,
-    CPP
+    CPP,
+    BASH,
+    PYTHON
 };
 
 

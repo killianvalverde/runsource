@@ -1546,7 +1546,7 @@ public:
     bool arg_found(const string_type& key) const noexcept
     {
         base_arg_type *base_arg = get_base_arg_reference(key);
-        return (base_arg->check_key(key) && base_arg->was_found());
+        return (base_arg != nullptr && base_arg->check_key(key) && base_arg->was_found());
     }
     
     /**
