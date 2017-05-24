@@ -127,9 +127,10 @@ public:
     >;
     
     /**
-     * @brief       Singleton class used to forward parameters to the basic_arg_parser constructor.
+     * @brief       Singleton class used to forward parameters to the basic_arg_parser
+     *              constructor.
      */
-    class constructor_params // todo make this lazy.
+    class constructor_params
     {
     public:
         /**
@@ -138,14 +139,16 @@ public:
          */
         static constructor_params& get()
         {
-            instance_.program_name_ = string_type();
-            instance_.short_prefixes_ = {kcs::type_casting::type_cast<string_type>("-")};
-            instance_.long_prefixes_ = {kcs::type_casting::type_cast<string_type>("--")};
-            instance_.key_help_description_indentation_ = 2u;
-            instance_.max_unrecognized_args_ = std::numeric_limits<std::size_t>::max();
-            instance_.flags_ = arg_parser_flags::DEFAULT_ARG_PARSER_FLAGS;
+            static constructor_params instance;
             
-            return instance_;
+            instance.program_name_ = string_type();
+            instance.short_prefixes_ = {kcs::type_casting::type_cast<string_type>("-")};
+            instance.long_prefixes_ = {kcs::type_casting::type_cast<string_type>("--")};
+            instance.key_help_description_indentation_ = 2u;
+            instance.max_unrecognized_args_ = std::numeric_limits<std::size_t>::max();
+            instance.flags_ = arg_parser_flags::DEFAULT_ARG_PARSER_FLAGS;
+            
+            return instance;
         }
     
         /**
@@ -239,16 +242,15 @@ public:
         std::size_t max_unrecognized_args_;
         arg_parser_flags flags_;
         
-        static constructor_params instance_;
-        
         friend class basic_arg_parser;
         /** @endcond */
     };
     
     /**
-     * @brief       Singleton class used to forward parameters to the add_key_value_arg methode.
+     * @brief       Singleton class used to forward parameters to the add_key_value_arg
+     *              methode.
      */
-    class add_key_value_arg_params // todo make this lazy
+    class add_key_value_arg_params
     {
     public:
         /**
@@ -257,16 +259,18 @@ public:
          */
         static add_key_value_arg_params& get()
         {
-            instance_.keys_ = vector_type<string_type>();
-            instance_.description_ = string_type();
-            instance_.values_types_ = {arg_value_types::STRING};
-            instance_.min_values_ = 1;
-            instance_.max_values_ = 1;
-            instance_.flags_ = arg_flags::DEFAULT_ARG_FLAGS;
-            instance_.regex_collection_ = vector_type<string_type>();
-            instance_.error_id_ = string_type();
+            static add_key_value_arg_params instance;
             
-            return instance_;
+            instance.keys_ = vector_type<string_type>();
+            instance.description_ = string_type();
+            instance.values_types_ = {arg_value_types::STRING};
+            instance.min_values_ = 1;
+            instance.max_values_ = 1;
+            instance.flags_ = arg_flags::DEFAULT_ARG_FLAGS;
+            instance.regex_collection_ = vector_type<string_type>();
+            instance.error_id_ = string_type();
+            
+            return instance;
         }
     
         /**
@@ -385,8 +389,6 @@ public:
         vector_type<string_type> regex_collection_;
         string_type error_id_;
     
-        static add_key_value_arg_params instance_;
-    
         friend class basic_arg_parser;
         /** @endcond */
     };
@@ -394,7 +396,7 @@ public:
     /**
      * @brief       Singleton class used to forward parameters to the add_foreign_arg methode.
      */
-    class add_foreign_arg_params // todo make this lazy
+    class add_foreign_arg_params
     {
     public:
         /**
@@ -403,17 +405,19 @@ public:
          */
         static add_foreign_arg_params& get()
         {
-            instance_.usage_key_ = string_type();
-            instance_.help_key_ = string_type();
-            instance_.description_ = string_type();
-            instance_.values_types_ = {arg_value_types::STRING};
-            instance_.min_values_ = 1;
-            instance_.max_values_ = 1;
-            instance_.flags_ = arg_flags::DEFAULT_FOREIGN_ARG_FLAGS;
-            instance_.regex_collection_ = vector_type<string_type>();
-            instance_.error_id_ = string_type();
+            static add_foreign_arg_params instance;
             
-            return instance_;
+            instance.usage_key_ = string_type();
+            instance.help_key_ = string_type();
+            instance.description_ = string_type();
+            instance.values_types_ = {arg_value_types::STRING};
+            instance.min_values_ = 1;
+            instance.max_values_ = 1;
+            instance.flags_ = arg_flags::DEFAULT_FOREIGN_ARG_FLAGS;
+            instance.regex_collection_ = vector_type<string_type>();
+            instance.error_id_ = string_type();
+            
+            return instance;
         }
     
         /**
@@ -545,8 +549,6 @@ public:
         arg_flags flags_;
         vector_type<string_type> regex_collection_;
         string_type error_id_;
-    
-        static add_foreign_arg_params instance_;
     
         friend class basic_arg_parser;
         /** @endcond */
@@ -813,8 +815,9 @@ public:
     template<typename TpString_>
     void add_help_text(TpString_&& description)
     {
-        help_text_type *help_text = help_text_type_alloc_.allocate(1);
-        help_text_type_alloc_.construct(help_text, std::forward<TpString_>(description));
+        allocator_type<help_text_type> help_text_type_alloc;
+        help_text_type *help_text = help_text_type_alloc.allocate(1);
+        help_text_type_alloc.construct(help_text, std::forward<TpString_>(description));
         
         ihelp_text_list_.push_back(help_text);
     }
@@ -858,13 +861,14 @@ public:
         }
         
         auto arg_key_list = get_arg_key_list_from_strings(keys);
-        
-        key_arg_type *key_arg = key_arg_type_alloc_.allocate(1);
-        key_arg_type_alloc_.construct(key_arg,
-                                      std::forward<TpString1_>(description),
-                                      std::forward<TpString2_>(error_id),
-                                      flags,
-                                      std::move(arg_key_list));
+    
+        allocator_type<key_arg_type> key_arg_type_alloc;
+        key_arg_type *key_arg = key_arg_type_alloc.allocate(1);
+        key_arg_type_alloc.construct(key_arg,
+                                     std::forward<TpString1_>(description),
+                                     std::forward<TpString2_>(error_id),
+                                     flags,
+                                     std::move(arg_key_list));
         
         for (auto& x : keys)
         {
@@ -928,13 +932,14 @@ public:
         }
         
         auto arg_key_list = get_arg_key_list_from_strings(keys);
-        
-        help_arg_type *help_arg = help_arg_type_alloc_.allocate(1);
-        help_arg_type_alloc_.construct(help_arg,
-                                       std::forward<TpString1_>(description),
-                                       std::forward<TpString2_>(error_id),
-                                       flags,
-                                       std::move(arg_key_list));
+    
+        allocator_type<help_arg_type> help_arg_type_alloc;
+        help_arg_type *help_arg = help_arg_type_alloc.allocate(1);
+        help_arg_type_alloc.construct(help_arg,
+                                      std::forward<TpString1_>(description),
+                                      std::forward<TpString2_>(error_id),
+                                      flags,
+                                      std::move(arg_key_list));
     
         for (auto& x : keys)
         {
@@ -1002,14 +1007,15 @@ public:
         }
     
         auto arg_key_list = get_arg_key_list_from_strings(keys);
-        
-        version_arg_type *version_arg = version_arg_type_alloc_.allocate(1);
-        version_arg_type_alloc_.construct(version_arg,
-                                          std::forward<TpString1_>(description),
-                                          std::forward<TpString3_>(error_id),
-                                          flags,
-                                          std::move(arg_key_list),
-                                          std::forward<TpString2_>(version_information));
+    
+        allocator_type<version_arg_type> version_arg_type_alloc;
+        version_arg_type *version_arg = version_arg_type_alloc.allocate(1);
+        version_arg_type_alloc.construct(version_arg,
+                                         std::forward<TpString1_>(description),
+                                         std::forward<TpString3_>(error_id),
+                                         flags,
+                                         std::move(arg_key_list),
+                                         std::forward<TpString2_>(version_information));
     
         for (auto& x : keys)
         {
@@ -1134,17 +1140,18 @@ public:
         }
     
         auto arg_key_list = get_arg_key_list_from_strings(keys);
-        
-        key_value_arg_type *key_value_arg = key_value_arg_type_alloc_.allocate(1);
-        key_value_arg_type_alloc_.construct(key_value_arg,
-                                            std::forward<TpString1_>(description),
-                                            std::forward<TpString2_>(error_id),
-                                            flags,
-                                            std::move(arg_key_list),
-                                            min_values,
-                                            max_values,
-                                            std::forward<TpArgValueTypesVector_>(values_types),
-                                            std::forward<TpStringVector2_>(regex_collection));
+    
+        allocator_type<key_value_arg_type> key_value_arg_type_alloc;
+        key_value_arg_type *key_value_arg = key_value_arg_type_alloc.allocate(1);
+        key_value_arg_type_alloc.construct(key_value_arg,
+                                           std::forward<TpString1_>(description),
+                                           std::forward<TpString2_>(error_id),
+                                           flags,
+                                           std::move(arg_key_list),
+                                           min_values,
+                                           max_values,
+                                           std::forward<TpArgValueTypesVector_>(values_types),
+                                           std::forward<TpStringVector2_>(regex_collection));
     
         for (auto& x : keys)
         {
@@ -1230,9 +1237,10 @@ public:
             throw arg_parser_exception("kcs::argparse::arg_parser_exception: the key is "
                                                "already used.");
         }
-        
-        foreign_arg_type* foreign_arg = foreign_arg_type_alloc_.allocate(1);
-        foreign_arg_type_alloc_.construct(foreign_arg,
+    
+        allocator_type<foreign_arg_type> foreign_arg_type_alloc;
+        foreign_arg_type* foreign_arg = foreign_arg_type_alloc.allocate(1);
+        foreign_arg_type_alloc.construct(foreign_arg,
                                           std::forward<TpString3_>(description),
                                           std::forward<TpString4_>(error_id),
                                           flags,
@@ -2134,6 +2142,12 @@ private:
         version_arg_type* version_arg;
         key_value_arg_type* key_value_arg;
         foreign_arg_type* foreign_arg;
+        allocator_type<help_text_type> help_text_type_alloc;
+        allocator_type<key_arg_type> key_arg_type_alloc;
+        allocator_type<help_arg_type> help_arg_type_alloc;
+        allocator_type<version_arg_type> version_arg_type_alloc;
+        allocator_type<key_value_arg_type> key_value_arg_type_alloc;
+        allocator_type<foreign_arg_type> foreign_arg_type_alloc;
         
         for (auto& x : ihelp_text_list_)
         {
@@ -2146,38 +2160,38 @@ private:
             
             if (foreign_arg != nullptr)
             {
-                p = foreign_arg_type_alloc_.allocate(1);
-                foreign_arg_type_alloc_.construct((foreign_arg_type*)p, *foreign_arg);
+                p = foreign_arg_type_alloc.allocate(1);
+                foreign_arg_type_alloc.construct((foreign_arg_type*)p, *foreign_arg);
                 ihelp_text = (foreign_arg_type*)p;
             }
             else if (key_value_arg != nullptr)
             {
-                p = key_value_arg_type_alloc_.allocate(1);
-                key_value_arg_type_alloc_.construct((key_value_arg_type*)p, *key_value_arg);
+                p = key_value_arg_type_alloc.allocate(1);
+                key_value_arg_type_alloc.construct((key_value_arg_type*)p, *key_value_arg);
                 ihelp_text = (key_value_arg_type*)p;
             }
             else if (version_arg != nullptr)
             {
-                p = version_arg_type_alloc_.allocate(1);
-                version_arg_type_alloc_.construct((version_arg_type*)p, *version_arg);
+                p = version_arg_type_alloc.allocate(1);
+                version_arg_type_alloc.construct((version_arg_type*)p, *version_arg);
                 ihelp_text = (version_arg_type*)p;
             }
             else if (help_arg != nullptr)
             {
-                p = help_arg_type_alloc_.allocate(1);
-                help_arg_type_alloc_.construct((help_arg_type*)p, *help_arg);
+                p = help_arg_type_alloc.allocate(1);
+                help_arg_type_alloc.construct((help_arg_type*)p, *help_arg);
                 ihelp_text = (help_arg_type*)p;
             }
             else if (key_arg != nullptr)
             {
-                p = key_arg_type_alloc_.allocate(1);
-                key_arg_type_alloc_.construct((key_arg_type*)p, *key_arg);
+                p = key_arg_type_alloc.allocate(1);
+                key_arg_type_alloc.construct((key_arg_type*)p, *key_arg);
                 ihelp_text = (key_arg_type*)p;
             }
             else if (help_text != nullptr)
             {
-                p = help_text_type_alloc_.allocate(1);
-                help_text_type_alloc_.construct((help_text_type*)p, *help_text);
+                p = help_text_type_alloc.allocate(1);
+                help_text_type_alloc.construct((help_text_type*)p, *help_text);
                 ihelp_text = (help_text_type*)p;
             }
             
@@ -2407,33 +2421,39 @@ private:
         
         if ((foreign_arg = dynamic_cast<foreign_arg_type*>(arg)) != nullptr)
         {
-            foreign_arg_type_alloc_.destroy(foreign_arg);
-            foreign_arg_type_alloc_.deallocate(foreign_arg, 1);
+            allocator_type<foreign_arg_type> foreign_arg_type_alloc;
+            foreign_arg_type_alloc.destroy(foreign_arg);
+            foreign_arg_type_alloc.deallocate(foreign_arg, 1);
         }
         else if ((key_value_arg = dynamic_cast<key_value_arg_type*>(arg)) != nullptr)
         {
-            key_value_arg_type_alloc_.destroy(key_value_arg);
-            key_value_arg_type_alloc_.deallocate(key_value_arg, 1);
+            allocator_type<key_value_arg_type> key_value_arg_type_alloc;
+            key_value_arg_type_alloc.destroy(key_value_arg);
+            key_value_arg_type_alloc.deallocate(key_value_arg, 1);
         }
         else if ((version_arg = dynamic_cast<version_arg_type*>(arg)) != nullptr)
         {
-            version_arg_type_alloc_.destroy(version_arg);
-            version_arg_type_alloc_.deallocate(version_arg, 1);
+            allocator_type<version_arg_type> version_arg_type_alloc;
+            version_arg_type_alloc.destroy(version_arg);
+            version_arg_type_alloc.deallocate(version_arg, 1);
         }
         else if ((help_arg = dynamic_cast<help_arg_type*>(arg)) != nullptr)
         {
-            help_arg_type_alloc_.destroy(help_arg);
-            help_arg_type_alloc_.deallocate(help_arg, 1);
+            allocator_type<help_arg_type> help_arg_type_alloc;
+            help_arg_type_alloc.destroy(help_arg);
+            help_arg_type_alloc.deallocate(help_arg, 1);
         }
         else if ((key_arg = dynamic_cast<key_arg_type*>(arg)) != nullptr)
         {
-            key_arg_type_alloc_.destroy(key_arg);
-            key_arg_type_alloc_.deallocate(key_arg, 1);
+            allocator_type<key_arg_type> key_arg_type_alloc;
+            key_arg_type_alloc.destroy(key_arg);
+            key_arg_type_alloc.deallocate(key_arg, 1);
         }
         else if ((heltp_text = dynamic_cast<help_text_type*>(arg)) != nullptr)
         {
-            help_text_type_alloc_.destroy((help_text_type*)arg);
-            help_text_type_alloc_.deallocate((help_text_type*)arg, 1);
+            allocator_type<help_text_type> help_text_type_alloc;
+            help_text_type_alloc.destroy((help_text_type*)arg);
+            help_text_type_alloc.deallocate((help_text_type*)arg, 1);
         }
         
         arg = nullptr;
@@ -2488,45 +2508,7 @@ private:
     
     /** Error flags that allows knowing wether there are errors. */
     flags_container_type<arg_parser_error_flags> error_flags_;
-    
-    /** basic_help_text allocator */
-    mutable allocator_type<help_text_type> help_text_type_alloc_;
-    
-    /** basic_key_arg allocator */
-    mutable allocator_type<key_arg_type> key_arg_type_alloc_;
-    
-    /** basic_value_arg allocator */
-    mutable allocator_type<value_arg_type> value_arg_type_alloc_;
-    
-    /** basic_help_arg allocator */
-    mutable allocator_type<help_arg_type> help_arg_type_alloc_;
-    
-    /** basic_version_arg allocator */
-    mutable allocator_type<version_arg_type> version_arg_type_alloc_;
-    
-    /** basic_key_value_arg allocator */
-    mutable allocator_type<key_value_arg_type> key_value_arg_type_alloc_;
-    
-    /** basic_foreign_arg allocator */
-    mutable allocator_type<foreign_arg_type> foreign_arg_type_alloc_;
 };
-
-
-/** @cond */
-template<typename TpChar, typename TpCharTraits, typename TpAlloc>
-typename basic_arg_parser<TpChar, TpCharTraits, TpAlloc>::constructor_params
-        basic_arg_parser<TpChar, TpCharTraits, TpAlloc>::constructor_params::instance_;
-
-
-template<typename TpChar, typename TpCharTraits, typename TpAlloc>
-typename basic_arg_parser<TpChar, TpCharTraits, TpAlloc>::add_key_value_arg_params
-        basic_arg_parser<TpChar, TpCharTraits, TpAlloc>::add_key_value_arg_params::instance_;
-
-
-template<typename TpChar, typename TpCharTraits, typename TpAlloc>
-typename basic_arg_parser<TpChar, TpCharTraits, TpAlloc>::add_foreign_arg_params
-        basic_arg_parser<TpChar, TpCharTraits, TpAlloc>::add_foreign_arg_params::instance_;
-/** @endcond */
 
 
 /** Class used to parse arguments based on 8 bit characters. */

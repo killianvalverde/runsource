@@ -446,7 +446,9 @@ private:
             error_flags_.flag_is_raised(arg_value_error_flags::REGEX_TO_MATCH_ERROR))
         {
             os << program_name << ": ";
-            if (!error_id.empty())
+            if (!error_id.empty() &&
+                (!invalid_path_ ||
+                 composite_flags_.flag_is_raised(arg_flags::PRINT_ERROR_ID_ON_PATH_ERROR)))
             {
                 os << error_id << ": ";
             }

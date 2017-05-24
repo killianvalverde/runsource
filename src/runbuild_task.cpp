@@ -35,7 +35,7 @@ runbuild_task::runbuild_task(const kap::arg_parser& ap)
         , compiler_args_()
         , program_args_()
 {
-    for (auto& x : ap.get_arg_values("SOURCE-FILE"))
+    for (auto& x : ap.get_arg_values("FILE"))
     {
         files_.push_back(x.type_cast<stdfs::path>());
     }

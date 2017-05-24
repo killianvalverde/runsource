@@ -18,12 +18,15 @@
 #include <experimental/filesystem>
 
 #include "kcs/argparse.hpp"
+#include "kcs/iostream.hpp"
 #include "kcs/system.hpp"
 #include "runbuild_task.hpp"
 
 namespace stdfs = std::experimental::filesystem;
 namespace kap = kcs::argparse;
 namespace ksys = kcs::system;
+namespace kstr = kcs::stringutils;
+namespace kios = kcs::iostream;
 
 
 int main(int argc, char *argv[])
@@ -61,15 +64,69 @@ int main(int argc, char *argv[])
     ap.add_gplv3_version_arg({"--version"}, "Output vesion information and exit", "1.0", "2017",
                              "Killian");
     ap.add_key_arg({"--pause", "-p"}, "Pause the program before exit.");
-    ap.add_foreign_arg("SOURCE-FILE", "Source file", "The source file path.", {kap::avt_t::R_FILE},
+    ap.add_foreign_arg("FILE", "File", "The source file path.", {kap::avt_t::R_FILE},
                        1u, ~0u);
+    
+    kios::ios_redirect ior(std::cout);
+    ior.redirect_to_embedded_stringstream();
     
     ap.parse_args((unsigned int)argc, argv);
     
+    if (ap.there_are_errors())
+    {
+        if (ap.get_foreign_arg("FILE").there_are_errors())
+        {
+            std::vector<std::string> argv_vec = {argv[0]};
+            std::string argv_builder;
+            
+            for (auto& x : ap.get_arg_values("FILE"))
+            {
+                auto current_values = kstr::strsplit(x.get_value(), ' ');
+                
+                for (auto& y : current_values)
+                {
+                    argv_builder += y;
+                    
+                    if (stdfs::exists(argv_builder))
+                    {
+                        argv_vec.push_back(std::move(argv_builder));
+                    }
+                    else
+                    {
+                        argv_builder += ' ';
+                    }
+                }
+                
+                if (!argv_builder.empty())
+                {
+                    goto exit;
+                }
+            }
+    
+            for (int i = 1; i < argc; i++)
+            {
+                if (argv[i][0] == '-')
+                {
+                    argv_vec.push_back(argv[i]);
+                }
+            }
+            
+            ap.parse_args(argv_vec.size(), argv_vec);
+        }
+    }
+    exit: ;
+    
     if (!ap.there_are_errors())
     {
+        ior.unredirect();
         runsource::runbuild_task rbtask(ap);
         result = rbtask.do_operation();
+    }
+    else
+    {
+        std::string s = ior.get_embedded_stringstream_str();
+        ior.unredirect();
+        std::cout << s;
     }
     
     if (ap.arg_found("--pause"))

@@ -97,7 +97,7 @@ public:
             , keys_vector_(std::forward<TpArgKeyVector_>(keys))
     {
         if (base_arg_type::error_id_is_empty() &&
-            base_arg_type::flag_is_raised(arg_flags::PRINT_FIRST_KEY_IF_ERROR_ID_EMPTY))
+            base_arg_type::flag_is_raised(arg_flags::USE_FIRST_KEY_IF_ERROR_ID_EMPTY))
         {
             base_arg_type::set_error_id(keys_vector_.front());
         }

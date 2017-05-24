@@ -34,7 +34,7 @@ namespace argparse {
 /**
  * @brief       Contains all argument flags constants.
  */
-enum class arg_flags : std::uint8_t
+enum class arg_flags : std::uint16_t
 {
     /** Null flag. */
     NULL_ARG_FLAGS = 0x0,
@@ -46,11 +46,11 @@ enum class arg_flags : std::uint8_t
     APPEAR_JUST_ONCE = 0x2,
     
     /** The argument can be chained (-la == -l -a). The minimum and the maximum number of values for
-     *  an option has to be the same. */
+     * an option has to be the same. */
     ALLOW_CHAIN = 0x4,
     
     /** The argument allows the equal operator (--tries=NUMBER). The minimum and the maximum number
-     *  of values for an option has to be one. */
+     * of values for an option has to be one. */
     ALLOW_EQ = 0x8,
     
     /** The 'min' constant can be used to refer to the minimum value of an integral type. */
@@ -60,10 +60,13 @@ enum class arg_flags : std::uint8_t
     ALLOW_MAX_CONSTANT = 0x20,
     
     /** The first key of an argument will be used to print the error id if the error id is empty. */
-    PRINT_FIRST_KEY_IF_ERROR_ID_EMPTY = 0x40,
+    USE_FIRST_KEY_IF_ERROR_ID_EMPTY = 0x40,
+    
+    /** Print the argument error id if there is an error with a path. */
+    PRINT_ERROR_ID_ON_PATH_ERROR = 0x80,
     
     /** All argument flags. */
-    FULL_ARG_FLAGS = 0x7F,
+    FULL_ARG_FLAGS = 0xFF,
     
     /** The default flags used for the arguments. */
     DEFAULT_ARG_FLAGS = (
@@ -72,7 +75,7 @@ enum class arg_flags : std::uint8_t
             ALLOW_EQ |
             ALLOW_MIN_CONSTANT |
             ALLOW_MAX_CONSTANT |
-            PRINT_FIRST_KEY_IF_ERROR_ID_EMPTY
+            USE_FIRST_KEY_IF_ERROR_ID_EMPTY
     ),
     
     DEFAULT_FOREIGN_ARG_FLAGS = (
@@ -80,7 +83,7 @@ enum class arg_flags : std::uint8_t
             ALLOW_MIN_CONSTANT |
             ALLOW_MAX_CONSTANT |
             ALLWAYS_REQUIRED |
-            PRINT_FIRST_KEY_IF_ERROR_ID_EMPTY
+            USE_FIRST_KEY_IF_ERROR_ID_EMPTY
     )
 };
 
