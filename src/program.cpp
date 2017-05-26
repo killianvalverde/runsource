@@ -20,11 +20,11 @@
 
 #include <unistd.h>
 #include <iomanip>
+#include <iostream>
 
 #include "program.hpp"
 
 namespace stdfs = std::experimental::filesystem;
-namespace kap = kcs::argparse;
 namespace rs = runsource;
 
 

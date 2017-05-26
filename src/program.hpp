@@ -25,7 +25,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "kcs/argparse.hpp"
 #include "c_standard.hpp"
 #include "cpp_standard.hpp"
 #include "language.hpp"
@@ -36,7 +35,6 @@ namespace runsource {
 
 
 namespace stdfs = std::experimental::filesystem;
-namespace kap = kcs::argparse;
 namespace rs = runsource;
 
 
