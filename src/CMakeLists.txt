@@ -12,10 +12,10 @@ include_directories(${CMAKE_SOURCE_DIR}/kcs/include)
 
 set(SOURCE_FILES
         main.cpp
-        runbuild_task.cpp
-        runbuild_task.hpp
+        program.cpp
+        program.hpp
         language.hpp
-        tool_chain.hpp)
+        tool_chain.hpp cpp_standard.hpp c_standard.hpp)
 
 add_executable(runsource ${SOURCE_FILES})
 target_link_libraries(runsource kcs -lstdc++fs)

@@ -6,7 +6,9 @@ Name=runsource
 
 Comment=Run a source file
 
-Exec=gnome-terminal -x sh -c "runsource '%F' -p"
+Quote=single
+
+Exec=gnome-terminal -x sh -c "runsource %F --pause"
 
 Icon-Name=applications-development
 

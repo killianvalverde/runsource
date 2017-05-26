@@ -18,35 +18,49 @@
 // Created by Killian on 22/05/17.
 //
 
-#ifndef RUNSOURCE_RUNBUILD_TASK_HPP
-#define RUNSOURCE_RUNBUILD_TASK_HPP
+#ifndef RUNSOURCE_PROGRAM_HPP
+#define RUNSOURCE_PROGRAM_HPP
 
 #include <experimental/filesystem>
 #include <unordered_set>
 #include <vector>
 
 #include "kcs/argparse.hpp"
+#include "c_standard.hpp"
+#include "cpp_standard.hpp"
 #include "language.hpp"
 #include "tool_chain.hpp"
-
-namespace stdfs = std::experimental::filesystem;
-namespace kap = kcs::argparse;
 
 
 namespace runsource {
 
 
-class runbuild_task
+namespace stdfs = std::experimental::filesystem;
+namespace kap = kcs::argparse;
+namespace rs = runsource;
+
+
+class program
 {
 public:
-    runbuild_task(const kap::arg_parser& ap);
+    program(
+            bool execute,
+            rs::language language,
+            rs::c_standard c_standard,
+            rs::cpp_standard cpp_standard,
+            rs::tool_chain tool_chain,
+            std::vector<std::string> compiler_args,
+            std::vector<std::string> program_args,
+            std::vector<stdfs::path> files
+    );
+    
+    int exec() const;
+
+private:
     bool is_c() const noexcept;
     bool is_cpp() const noexcept;
     bool is_bash() const noexcept;
     bool is_python() const noexcept;
-    int do_operation() const;
-
-private:
     int gcc_build_c(std::string output_name, bool verbose) const;
     int gcc_exec_c() const;
     int gcc_build_cpp(std::string output_name, bool verbose) const;
@@ -55,14 +69,14 @@ private:
     int exec_python() const;
 
 private:
-    std::vector<stdfs::path> files_;
-    tool_chain tool_chain_;
-    bool build_;
-    language language_;
-    std::string c_standard_;
-    std::string cpp_standard_;
+    bool execute_;
+    rs::language language_;
+    rs::c_standard c_standard_;
+    rs::cpp_standard cpp_standard_;
+    rs::tool_chain tool_chain_;
     std::vector<std::string> compiler_args_;
     std::vector<std::string> program_args_;
+    std::vector<stdfs::path> files_;
     
     static std::unordered_set<std::string> c_extensions_;
     static std::unordered_set<std::string> cpp_extensions_;

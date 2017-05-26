@@ -42,7 +42,6 @@ void pause(const char *message)
     static struct termios oldt, newt;
     if (message != nullptr)
     {
-        //printf("Press key to continue....\n");
         printf("%s\n", message);
     }
     tcgetattr(STDIN_FILENO, &oldt);

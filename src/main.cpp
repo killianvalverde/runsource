@@ -18,33 +18,36 @@
 #include <experimental/filesystem>
 
 #include "kcs/argparse.hpp"
-#include "kcs/iostream.hpp"
 #include "kcs/system.hpp"
-#include "runbuild_task.hpp"
+#include "program.hpp"
 
 namespace stdfs = std::experimental::filesystem;
 namespace kap = kcs::argparse;
 namespace ksys = kcs::system;
-namespace kstr = kcs::stringutils;
-namespace kios = kcs::iostream;
+namespace rs = runsource;
 
 
 int main(int argc, char *argv[])
 {
-    kap::arg_parser ap(kap::arg_parser::constructor_params::get()
-                               .program_name("runsource")
-                               .flags(kap::apf_t::DEFAULT_ARG_PARSER_FLAGS &
-                                      ~kap::apf_t::EXIT_ON_PRINT_ARGS_ERRORS));
     int result;
+    kap::arg_parser ap("runsource");
     
-    ap.add_help_text("The folowind options are set by defautl: -gcc -e -c11 -c++17\nOptions:");
-    ap.add_key_arg({"--gcc", "-gcc"}, "Use gcc tool chain for C and C++.");
+    ap.add_help_text("The folowind options are set by defautl: --exec --gcc --c11 --c++17");
+    ap.add_help_text("Options:");
     ap.add_key_arg({"--exec", "-e"}, "Execute the specified source file.");
     ap.add_key_arg({"--build", "-b"}, "Build the specified source file.");
-    ap.add_key_arg({"--clanguage", "-cln"}, "Force C language interpretation.");
-    ap.add_key_arg({"--c++language", "-c++"}, "Force C++ language interpretation.");
-    ap.add_key_arg({"--bash", "-bsh"}, "Force bash language interpretation.");
-    ap.add_key_arg({"--python", "-py"}, "Force python language interpretation.");
+    ap.add_key_value_arg({"--compiler-args", "-ca"},
+                         "Forward the folowing arguments to the compiler.", {kap::avt_t::STRING},
+                         1u, ~0u);
+    ap.add_key_value_arg({"--program-args", "-pa"},
+                         "Forward the folowing arguments to the produced program.",
+                         {kap::avt_t::STRING}, 1u, ~0u);
+    ap.add_key_arg({"--pause", "-p"}, "Pause the program before exit.");
+    ap.add_key_arg({"--gcc"}, "Use gcc tool chain for C and C++.");
+    ap.add_key_arg({"--c"}, "Force C language interpretation.");
+    ap.add_key_arg({"--c++"}, "Force C++ language interpretation.");
+    ap.add_key_arg({"--bash"}, "Force bash language interpretation.");
+    ap.add_key_arg({"--python"}, "Force python language interpretation.");
     ap.add_key_arg({"--c89"}, "Use C89 standard when C language is selected.");
     ap.add_key_arg({"--c90"}, "Use C90 standard when C language is selected");
     ap.add_key_arg({"--c99"}, "Use C99 standard when C language is selected");
@@ -54,80 +57,107 @@ int main(int argc, char *argv[])
     ap.add_key_arg({"--c++11"}, "Use C++11 standard when C++ language is selected.");
     ap.add_key_arg({"--c++14"}, "Use C++14 standard when C++ language is selected.");
     ap.add_key_arg({"--c++17"}, "Use C++17 standard when C++ language is selected.");
-    ap.add_key_value_arg({"--compiler-args", "-ca"},
-                         "Forward the folowing arguments to the compiler.", {kap::avt_t::STRING},
-                         1u, ~0u);
-    ap.add_key_value_arg({"--program-args", "-pa"},
-                         "Forward the folowing arguments to the produced program.",
-                         {kap::avt_t::STRING}, 1u, ~0u);
     ap.add_help_arg({"--help"}, "Display this help and exit.");
     ap.add_gplv3_version_arg({"--version"}, "Output vesion information and exit", "1.0", "2017",
                              "Killian");
-    ap.add_key_arg({"--pause", "-p"}, "Pause the program before exit.");
     ap.add_foreign_arg("FILE", "File", "The source file path.", {kap::avt_t::R_FILE},
                        1u, ~0u);
     
-    kios::ios_redirect ior(std::cout);
-    ior.redirect_to_embedded_stringstream();
-    
     ap.parse_args((unsigned int)argc, argv);
     
-    if (ap.there_are_errors())
+    rs::language language = rs::language::NIL;
+    if (ap.arg_found("--c"))
     {
-        if (ap.get_foreign_arg("FILE").there_are_errors())
-        {
-            std::vector<std::string> argv_vec = {argv[0]};
-            std::string argv_builder;
-            
-            for (auto& x : ap.get_arg_values("FILE"))
-            {
-                auto current_values = kstr::strsplit(x.get_value(), ' ');
-                
-                for (auto& y : current_values)
-                {
-                    argv_builder += y;
-                    
-                    if (stdfs::exists(argv_builder))
-                    {
-                        argv_vec.push_back(std::move(argv_builder));
-                    }
-                    else
-                    {
-                        argv_builder += ' ';
-                    }
-                }
-                
-                if (!argv_builder.empty())
-                {
-                    goto exit;
-                }
-            }
+        language = rs::language::C;
+    }
+    else if (ap.arg_found("--c++"))
+    {
+        language = rs::language::CPP;
+    }
+    else if (ap.arg_found("--bash"))
+    {
+        language = rs::language::BASH;
+    }
+    else if (ap.arg_found("--python"))
+    {
+        language = rs::language::PYTHON;
+    }
+
+    rs::c_standard c_standard = rs::c_standard::C11;
+    if (ap.arg_found("--c89"))
+    {
+        c_standard = rs::c_standard::C89;
+    }
+    else if (ap.arg_found("--c90"))
+    {
+        c_standard = rs::c_standard::C90;
+    }
+    else if (ap.arg_found("--c99"))
+    {
+        c_standard = rs::c_standard::C99;
+    }
+    else if (ap.arg_found("--c11"))
+    {
+        c_standard = rs::c_standard::C11;
+    }
     
-            for (int i = 1; i < argc; i++)
-            {
-                if (argv[i][0] == '-')
-                {
-                    argv_vec.push_back(argv[i]);
-                }
-            }
-            
-            ap.parse_args(argv_vec.size(), argv_vec);
-        }
+    rs::cpp_standard cpp_standard = rs::cpp_standard::CPP17;
+    if (ap.arg_found("--c++98"))
+    {
+        cpp_standard = rs::cpp_standard::CPP98;
     }
-    exit: ;
+    else if (ap.arg_found("--c++03"))
+    {
+        cpp_standard = rs::cpp_standard::CPP03;
+    }
+    else if (ap.arg_found("--c++11"))
+    {
+        cpp_standard = rs::cpp_standard::CPP11;
+    }
+    else if (ap.arg_found("--c++14"))
+    {
+        cpp_standard = rs::cpp_standard::CPP14;
+    }
+    else if (ap.arg_found("--c++17"))
+    {
+        cpp_standard = rs::cpp_standard::CPP17;
+    }
     
-    if (!ap.there_are_errors())
+    rs::tool_chain tool_chain = rs::tool_chain::GCC;
+    if (ap.arg_found("--gcc"))
     {
-        ior.unredirect();
-        runsource::runbuild_task rbtask(ap);
-        result = rbtask.do_operation();
+        tool_chain = rs::tool_chain::GCC;
     }
-    else
+
+    std::vector<std::string> compiler_args;
+    for (auto& x : ap.get_arg_values("--compiler-args", std::nothrow))
     {
-        std::string s = ior.get_embedded_stringstream_str();
-        ior.unredirect();
-        std::cout << s;
+        compiler_args.push_back(x.get_value());
     }
+    
+    std::vector<std::string> program_args;
+    for (auto& x : ap.get_arg_values("--program-args", std::nothrow))
+    {
+        program_args.push_back(x.get_value());
+    }
+
+    std::vector<stdfs::path> files;
+    for (auto& x : ap.get_arg_values("FILE"))
+    {
+        files.push_back(x.type_cast<stdfs::path>());
+    }
+
+    runsource::program prog(
+            !ap.arg_found("--build"),
+            language,
+            c_standard,
+            cpp_standard,
+            tool_chain,
+            std::move(compiler_args),
+            std::move(program_args),
+            std::move(files)
+    );
+    result = prog.exec();
     
     if (ap.arg_found("--pause"))
     {
