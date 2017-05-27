@@ -44,8 +44,16 @@ class ibasic_help_text
 public:
     /**
      * @brief       Print the argument information for help menu.
+     * @param       max_description_line_length : The maximum arguments description length that will
+     *              be printed in a single line.
+     * @param       newline_indentation : The indentation used when a newline is found.
+     * @param       current_line_length : The length of the current line.
      */
-    virtual void print_help_text() const = 0;
+    virtual void print_help_text(
+            std::size_t max_description_line_length,
+            std::size_t newline_indentation,
+            std::size_t current_line_length
+    ) const = 0;
 
 };
 

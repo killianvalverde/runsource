@@ -147,6 +147,14 @@ private:
     /** Argument version information content. */
     string_type version_information;
 };
+
+
+/** Class that represents the option to get the version information with 8 bits characters. */
+using version_arg = basic_version_arg<char>;
+
+
+/** Class that represents the option to get the version information with 16 bits characters. */
+using wversion_arg = basic_version_arg<wchar_t>;
     
     
 }

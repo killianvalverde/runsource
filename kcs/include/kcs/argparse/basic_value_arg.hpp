@@ -459,10 +459,11 @@ public:
     /**
      * @brief       Print argument errors in standard output.
      * @param       program_name : The name of the program.
+     * @param       colors_enable : If it is true, colors will be used during the print.
      */
-    void print_errors(const string_type& program_name) const override
+    void print_errors(const string_type& program_name, bool colors_enable) const override
     {
-        base_arg_type::print_errors(program_name);
+        base_arg_type::print_errors(program_name, colors_enable);
         
         auto& os = kcs::iostream::get_cout<char_type>();
         
@@ -471,7 +472,18 @@ public:
             os << program_name << ": ";
             if (!this->get_error_id().empty())
             {
-                os << this->get_error_id() << ": ";
+                if (colors_enable)
+                {
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::LIGHT_RED);
+                    os << this->get_error_id() << ": ";
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::DEFAULT);
+                }
+                else
+                {
+                    os << this->get_error_id() << ": ";
+                }
             }
             os << "Option requires at least " << min_values_
                << (min_values_ > 1 ? " arguments" : " argument") << std::endl;
@@ -482,7 +494,18 @@ public:
             os << program_name << ": ";
             if (!this->get_error_id().empty())
             {
-                os << this->get_error_id() << ": ";
+                if (colors_enable)
+                {
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::LIGHT_RED);
+                    os << this->get_error_id() << ": ";
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::DEFAULT);
+                }
+                else
+                {
+                    os << this->get_error_id() << ": ";
+                }
             }
             os << "Option must have a maximum of " << max_values_
                << (max_values_ > 1 ? " arguments" : " argument") << std::endl;
@@ -495,7 +518,7 @@ public:
             {
                 if (x.there_are_errors())
                 {
-                    x.print_errors(program_name, this->get_error_id());
+                    x.print_errors(program_name, this->get_error_id(), colors_enable);
                 }
             }
         }
@@ -577,6 +600,14 @@ private:
      *  match. */
     vector_type<string_type> regex_collection_;
 };
+
+
+/** Class that represents arguments that have values with 8 bits characters. */
+using value_arg = basic_value_arg<char>;
+
+
+/** Class that represents arguments that have values with 16 bits characters. */
+using wvalue_arg = basic_value_arg<wchar_t>;
     
     
 }

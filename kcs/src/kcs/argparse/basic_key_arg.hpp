@@ -207,7 +207,7 @@ public:
         {
             if (!x.is_prefix_long())
             {
-                kcs::lowlevel::try_addml(keys_length, x.get_key().length(), 2);
+                kcs::lowlevel::try_addml(&keys_length, x.get_key().length(), 2);
             }
         }
         
@@ -226,7 +226,7 @@ public:
         {
             if (x.is_prefix_long())
             {
-                kcs::lowlevel::try_addml(keys_length, x.get_key().length(), 2);
+                kcs::lowlevel::try_addml(&keys_length, x.get_key().length(), 2);
             }
         }
         
@@ -259,7 +259,7 @@ public:
                     os << *it;
                 }
     
-                kcs::lowlevel::try_addm(n_args_printed, 1);
+                kcs::lowlevel::try_addm(&n_args_printed, 1);
             }
         }
         
@@ -282,22 +282,27 @@ public:
                     os << *it;
                 }
     
-                kcs::lowlevel::try_addm(n_args_printed, 1);
+                kcs::lowlevel::try_addm(&n_args_printed, 1);
             }
         }
     }
     
     /**
      * @brief       Print the argument information for help menu.
+     * @param       max_description_line_length : The maximum arguments description length that will
+     *              be printed in a single line.
+     * @param       newline_indentation : The indentation used when a newline is found.
+     * @param       keys_indentation : Indentation used to separate keys help descriptions during
+     *              the print.
      * @param       short_id_length : The maximum length of the short keys.
      * @param       long_id_length : The maximum length of the long keys.
-     * @param       indentation : Indentation used to separate keys help descriptions during the
-     *              print.
      */
     void print_help_text(
+            std::size_t max_description_line_length,
+            std::size_t newline_indentation,
+            std::size_t keys_indentation,
             std::size_t short_id_length,
-            std::size_t long_id_length,
-            std::size_t indentation
+            std::size_t long_id_length
     ) const override
     {
         if (base_arg_type::description_is_empty())
@@ -310,7 +315,7 @@ public:
         std::size_t n_args_printed = 0;
         std::size_t i;
     
-        for (i = indentation; i > 0; i--)
+        for (i = keys_indentation; i > 0; i--)
         {
             os << (char_type)' ';
         }
@@ -322,22 +327,22 @@ public:
                 if (n_args_printed > 0)
                 {
                     os << ", " << *it;
-                    kcs::lowlevel::try_addml(current_id_length, it->get_key().length(), 2);
+                    kcs::lowlevel::try_addml(&current_id_length, it->get_key().length(), 2);
                 }
                 else
                 {
                     os << *it;
-                    kcs::lowlevel::try_addm(current_id_length, it->get_key().length());
+                    kcs::lowlevel::try_addm(&current_id_length, it->get_key().length());
                 }
     
-                kcs::lowlevel::try_addm(n_args_printed, 1);
+                kcs::lowlevel::try_addm(&n_args_printed, 1);
             }
         }
         
         if (n_args_printed < keys_vector_.size() && n_args_printed > 0)
         {
             os << ", ";
-            kcs::lowlevel::try_addm(current_id_length, 2);
+            kcs::lowlevel::try_addm(&current_id_length, 2);
         }
         
         if (current_id_length < short_id_length)
@@ -357,15 +362,15 @@ public:
                 if (n_args_printed > 0)
                 {
                     os << ", " << *it;
-                    kcs::lowlevel::try_addml(current_id_length, it->get_key().length(), 2);
+                    kcs::lowlevel::try_addml(&current_id_length, it->get_key().length(), 2);
                 }
                 else
                 {
                     os << *it;
-                    kcs::lowlevel::try_addm(current_id_length, it->get_key().length());
+                    kcs::lowlevel::try_addm(&current_id_length, it->get_key().length());
                 }
     
-                kcs::lowlevel::try_addm(n_args_printed, 1);
+                kcs::lowlevel::try_addm(&n_args_printed, 1);
             }
         }
         
@@ -377,8 +382,14 @@ public:
             }
         }
     
-        kcs::lowlevel::try_addm(short_id_length, long_id_length);
-        base_arg_type::print_description(indentation, short_id_length);
+        kcs::lowlevel::try_addml(&keys_indentation,
+                                 short_id_length,
+                                 long_id_length);
+        kcs::lowlevel::try_addm(&newline_indentation,
+                                keys_indentation);
+        base_arg_type::print_help_text(max_description_line_length,
+                                       newline_indentation,
+                                       keys_indentation);
     }
 
 protected:
@@ -418,6 +429,14 @@ private:
     /** Argument keys collection. */
     vector_type<arg_key_type> keys_vector_;
 };
+
+
+/** Class that represents arguments that have keys with 8 bits characters. */
+using key_arg = basic_key_arg<char>;
+
+
+/** Class that represents arguments that have keys with 16 bits characters. */
+using wkey_arg = basic_key_arg<wchar_t>;
 
 
 }

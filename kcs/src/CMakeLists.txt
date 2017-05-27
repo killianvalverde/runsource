@@ -58,7 +58,7 @@ set(SOURCE_FILES
         kcs/iostream/basic_ios_redirect.hpp 
         kcs/system/input_output.hpp 
         kcs/system/input_output.cpp
-        )
+        kcs/system/filesystem.hpp)
 
 add_library(kcs STATIC ${SOURCE_FILES})
 

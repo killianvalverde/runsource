@@ -145,6 +145,8 @@ public:
             instance.short_prefixes_ = {kcs::type_casting::type_cast<string_type>("-")};
             instance.long_prefixes_ = {kcs::type_casting::type_cast<string_type>("--")};
             instance.key_help_description_indentation_ = 2u;
+            instance.max_description_line_length_ = 80u;
+            instance.newline_indentation_ = 2u;
             instance.max_unrecognized_args_ = std::numeric_limits<std::size_t>::max();
             instance.flags_ = arg_parser_flags::DEFAULT_ARG_PARSER_FLAGS;
             
@@ -189,8 +191,8 @@ public:
     
         /**
          * @brief       Set the key help description indentation.
-         * @param       key_help_description_indentation : Indentation used to separate keys help
-         *              descriptions during the print.
+         * @param       key_help_description_indentation : Indentation used to print keys arguments
+         *              help description.
          * @return      The object who call the method.
          */
         constructor_params& key_help_description_indentation(
@@ -198,6 +200,29 @@ public:
         )
         {
             key_help_description_indentation_ = key_help_description_indentation;
+            return *this;
+        }
+    
+        /**
+         * @brief       Set the maximum description line length.
+         * @param       max_description_line_length : The maximum arguments description length that
+         *              will be printed in a single line.
+         * @return      The object who call the method.
+         */
+        constructor_params& max_description_line_length(std::size_t max_description_line_length)
+        {
+            max_description_line_length_ = max_description_line_length;
+            return *this;
+        }
+    
+        /**
+         * @brief       Set the newline indentation length.
+         * @param       newline_indentation : The indentation used when a newline is found.
+         * @return      The object who call the method.
+         */
+        constructor_params& newline_indentation(std::size_t newline_indentation)
+        {
+            newline_indentation_ = newline_indentation;
             return *this;
         }
     
@@ -239,6 +264,8 @@ public:
         unordered_set_type<string_type> short_prefixes_;
         unordered_set_type<string_type> long_prefixes_;
         std::size_t key_help_description_indentation_;
+        std::size_t max_description_line_length_;
+        std::size_t newline_indentation_;
         std::size_t max_unrecognized_args_;
         arg_parser_flags flags_;
         
@@ -559,8 +586,11 @@ public:
      * @param       program_name : The program name.
      * @param       short_prefixes : Collection that contains the arguments short prefixes.
      * @param       long_prefixes : Collection that contains the arguments long prefixes.
-     * @param       key_help_description_indentation : Indentation used to separate keys help
-     *              descriptions during the print.
+     * @param       key_help_description_indentation : Indentation used to print keys arguments help
+     *              description.
+     * @param       max_description_line_length : The maximum arguments description length that will
+     *              be printed in a single line.
+     * @param       newline_indentation : The indentation used when a newline is found.
      * @param       max_unrecognized_args : The muximum number of unrecognized arguments that will
      *              be catched.
      * @param       flags : Flags that dictates the argument parser behavior.
@@ -578,6 +608,8 @@ public:
             TpStringSet1_&& short_prefixes = {kcs::type_casting::type_cast<string_type>("-")},
             TpStringSet2_&& long_prefixes = {kcs::type_casting::type_cast<string_type>("--")},
             std::size_t key_help_description_indentation = 2u,
+            std::size_t max_description_line_length = 80u,
+            std::size_t newline_indentation = 2u,
             std::size_t max_unrecognized_args = std::numeric_limits<std::size_t>::max(),
             arg_parser_flags flags = arg_parser_flags::DEFAULT_ARG_PARSER_FLAGS
     )
@@ -585,6 +617,8 @@ public:
             , short_prefixes_(std::forward<TpStringSet1_>(short_prefixes))
             , long_prefixes_(std::forward<TpStringSet2_>(long_prefixes))
             , key_help_description_indentation_(key_help_description_indentation)
+            , max_description_line_length_(max_description_line_length)
+            , newline_indentation_(newline_indentation)
             , ihelp_text_list_()
             , current_help_arg_(nullptr)
             , current_version_arg_(nullptr)
@@ -1778,7 +1812,9 @@ public:
         {
             for (auto& x : ihelp_text_list_)
             {
-                if (dynamic_cast<key_arg_type*>(x) != nullptr)
+                if (dynamic_cast<key_arg_type*>(x) != nullptr &&
+                    dynamic_cast<help_arg_type*>(x) == nullptr &&
+                    dynamic_cast<version_arg_type*>(x) == nullptr)
                 {
                     n_key_args++;
                     
@@ -1787,6 +1823,12 @@ public:
                         break;
                     }
                 }
+            }
+            
+            if ((n_key_args == 0 && current_help_arg_ != nullptr) ||
+                (n_key_args == 0 && current_version_arg_ != nullptr))
+            {
+                n_key_args = 1;
             }
             
             os << "Usage: " << program_name_;
@@ -1809,23 +1851,20 @@ public:
             os << std::endl;
         }
         
-        if (flags_.flag_is_raised(arg_parser_flags::PRINT_OPTIONS_ON_PRINT_HELP))
-        {
-            os << "Options:" << std::endl;
-        }
-        
         for (auto& x : ihelp_text_list_)
         {
             if (dynamic_cast<help_text_type*>(x) != nullptr ||
                 !flags_.flag_is_raised(arg_parser_flags::PRINT_ARGS_ID_ON_PRINT_HELP))
             {
-                x->print_help_text();
+                x->print_help_text(max_description_line_length_, newline_indentation_, 0);
             }
             else if ((base_arg = dynamic_cast<base_arg_type*>(x)) != nullptr)
             {
-                base_arg->print_help_text(short_id_length,
-                                          long_id_length,
-                                          key_help_description_indentation_);
+                base_arg->print_help_text(max_description_line_length_,
+                                          newline_indentation_,
+                                          key_help_description_indentation_,
+                                          short_id_length,
+                                          long_id_length);
             }
         }
         
@@ -1869,7 +1908,8 @@ public:
                     base_arg = dynamic_cast<base_arg_type*>(x);
                     if (base_arg != nullptr && base_arg->there_are_errors())
                     {
-                        base_arg->print_errors(program_name_);
+                        base_arg->print_errors(program_name_, flags_.flag_is_raised(
+                                arg_parser_flags::USE_COLORS_ON_PRINT_ERRORS));
                     }
                 }
             }
@@ -1921,7 +1961,8 @@ public:
         
         if (base_arg != nullptr)
         {
-            base_arg->print_error_message(error_message, program_name_);
+            base_arg->print_error_message(error_message, program_name_, flags_.flag_is_raised(
+                    arg_parser_flags::USE_COLORS_ON_PRINT_ERRORS));
         }
         else
         {
@@ -2479,8 +2520,14 @@ private:
     /** Collection that contains the long prefixes arguments. The default long prefix is '--' */
     unordered_set_type<string_type> long_prefixes_;
     
-    /** Indentation used to separate keys help descriptions during the print. */
+    /** Indentation used to print keys arguments help description. */
     std::size_t key_help_description_indentation_;
+    
+    /** The maximum arguments description length that will be printed in a single line. */
+    std::size_t max_description_line_length_;
+    
+    /** The indentation used when a newline is found. */
+    std::size_t newline_indentation_;
     
     /** Collection that contains all the arguments. */
     vector_type<ihelp_text_type*> ihelp_text_list_;

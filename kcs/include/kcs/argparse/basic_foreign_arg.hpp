@@ -218,15 +218,20 @@ public:
     
     /**
      * @brief       Print the argument information for help menu.
+     * @param       max_description_line_length : The maximum arguments description length that will
+     *              be printed in a single line.
+     * @param       newline_indentation : The indentation used when a newline is found.
+     * @param       keys_indentation : Indentation used to separate keys help descriptions during
+     *              the print.
      * @param       short_id_length : The maximum length of the short keys.
      * @param       long_id_length : The maximum length of the long keys.
-     * @param       indentation : Indentation used to separate keys help descriptions during the
-     *              print.
      */
     void print_help_text(
+            std::size_t max_description_line_length,
+            std::size_t newline_indentation,
+            std::size_t keys_indentation,
             std::size_t short_id_length,
-            std::size_t long_id_length,
-            std::size_t indentation
+            std::size_t long_id_length
     ) const override
     {
         if (base_arg_type::description_is_empty())
@@ -239,7 +244,7 @@ public:
         std::size_t total_id_length = kcs::lowlevel::addm(short_id_length, long_id_length);
         std::size_t i;
     
-        for (i = indentation; i > 0; i--)
+        for (i = keys_indentation; i > 0; i--)
         {
             os << (char_type)' ';
         }
@@ -254,16 +259,23 @@ public:
             }
         }
     
-        base_arg_type::print_description(indentation, total_id_length);
+        kcs::lowlevel::try_addm(&keys_indentation,
+                                total_id_length);
+        kcs::lowlevel::try_addm(&newline_indentation,
+                                keys_indentation);
+        base_arg_type::print_help_text(max_description_line_length,
+                                       newline_indentation,
+                                       keys_indentation);
     }
     
     /**
      * @brief       Print argument errors in standard output.
      * @param       program_name : The name of the program.
+     * @param       colors_enable : If it is true, colors will be used during the print.
      */
-    void print_errors(const string_type& program_name) const override
+    void print_errors(const string_type& program_name, bool colors_enable) const override
     {
-        value_arg_type::print_errors(program_name);
+        value_arg_type::print_errors(program_name, colors_enable);
     }
 
 private:

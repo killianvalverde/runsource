@@ -89,19 +89,19 @@ inline TpTarget addol(
  */
 template<typename TpTarget, typename TpValue>
 inline bool try_addo(
-        TpTarget& target,
+        TpTarget *target,
         const TpValue& values
 ) noexcept
 {
     constexpr TpTarget max_trg = std::numeric_limits<TpTarget>::max();
     bool scs = true;
     
-    if (target > max_trg - static_cast<TpTarget>(values))
+    if (*target > max_trg - static_cast<TpTarget>(values))
     {
         scs = false;
     }
     
-    target += static_cast<TpTarget>(values);
+    *target += static_cast<TpTarget>(values);
     
     return scs;
 }
@@ -115,7 +115,7 @@ inline bool try_addo(
  */
 template<typename TpTarget, typename... TpValues>
 inline bool try_addol(
-        TpTarget& target,
+        TpTarget *target,
         const TpValues& ... values
 ) noexcept
 {
@@ -123,9 +123,9 @@ inline bool try_addol(
     bool scs = true;
     
     int dummy[sizeof...(TpValues)] = { (
-        ((target > max_trg - static_cast<TpTarget>(values)) ?
+        ((*target > max_trg - static_cast<TpTarget>(values)) ?
                 scs = false : 0),
-        target += static_cast<TpTarget>(values), 0
+        *target += static_cast<TpTarget>(values), 0
     )... };
     
     return scs;
@@ -192,21 +192,21 @@ inline TpTarget addml(
  */
 template<typename TpTarget, typename TpValue>
 inline bool try_addm(
-        TpTarget& target,
+        TpTarget *target,
         const TpValue& value
 ) noexcept
 {
     constexpr TpTarget max_trg = std::numeric_limits<TpTarget>::max();
     bool scs = true;
     
-    if (target > max_trg - static_cast<TpTarget>(value))
+    if (*target > max_trg - static_cast<TpTarget>(value))
     {
-        target = max_trg;
+        *target = max_trg;
         scs = false;
     }
     else
     {
-        target += static_cast<TpTarget>(value);
+        *target += static_cast<TpTarget>(value);
     }
     
     return scs;
@@ -222,7 +222,7 @@ inline bool try_addm(
  */
 template<typename TpTarget, typename... TpValues>
 inline bool try_addml(
-        TpTarget& target,
+        TpTarget *target,
         const TpValues& ... values
 ) noexcept
 {
@@ -230,9 +230,9 @@ inline bool try_addml(
     bool scs = true;
     
     int dummy[sizeof...(TpValues)] = { (
-        (target > max_trg - static_cast<TpTarget>(values)) ?
-                target = max_trg, scs = false :
-                target += static_cast<TpTarget>(values), 0
+        (*target > max_trg - static_cast<TpTarget>(values)) ?
+                *target = max_trg, scs = false :
+                *target += static_cast<TpTarget>(values), 0
     )... };
     
     return scs;

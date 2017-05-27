@@ -40,6 +40,14 @@
  * @brief       Contians all kcs librarie.
  */
 namespace kcs {
+
+
+// todo : implement system functions for ms-windows.
+// todo : implement your own floating point cast generic function.
+// todo : finish unit test.
+// todo : document template parameters ?
+
+
 }
 
 

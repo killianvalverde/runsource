@@ -210,6 +210,14 @@ std::basic_ostream<TpChar, TpCharTraits>& operator <<(
 }
 
 
+/** Class that represents a key for an argument with 8 bits characters. */
+using arg_key = basic_arg_key<char>;
+
+
+/** Class that represents a key for an argument with 16 bits characters. */
+using warg_key = basic_arg_key<wchar_t>;
+
+
 }
 }
 

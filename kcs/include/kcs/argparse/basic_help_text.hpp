@@ -24,6 +24,7 @@
 #ifndef KCS_ARGPARSE_BASIC_HELP_TEXT_HPP
 #define KCS_ARGPARSE_BASIC_HELP_TEXT_HPP
 
+#include "../stringutils/stringutils.hpp"
 #include "ibasic_help_text.hpp"
 
 
@@ -105,10 +106,19 @@ public:
      */
     basic_help_text& operator =(basic_help_text&& rhs) noexcept = default;
     
+    
     /**
      * @brief       Print the argument information for help menu.
+     * @param       max_description_line_length : The maximum arguments description length that will
+     *              be printed in a single line.
+     * @param       newline_indentation : The indentation used when a newline is found.
+     * @param       current_line_length : The length of the current line.
      */
-    void print_help_text() const override
+    void print_help_text(
+            std::size_t max_description_line_length,
+            std::size_t newline_indentation,
+            std::size_t current_line_length
+    ) const override
     {
         if (text_.empty())
         {
@@ -116,14 +126,68 @@ public:
         }
     
         auto& os = kcs::iostream::get_cout<char_type>();
+        std::size_t length_to_next;
+        
+        for (auto it = text_.cbegin(); it != text_.cend(); it++)
+        {
+            if (*it == (char_type)'\n')
+            {
+                current_line_length = newline_indentation;
+                os << std::endl;
+                for (std::size_t i = 0; i < newline_indentation; i++)
+                {
+                    os << (char_type)' ';
+                }
+            }
+            else if (*it == (char_type)' ')
+            {
+                length_to_next = 1;
     
-        os << text_ << std::endl;
+                auto aux_it = it;
+                aux_it++;
+                for (; aux_it != text_.cend() && *aux_it != ' '; aux_it++)
+                {
+                    length_to_next++;
+                }
+            
+                kcs::lowlevel::try_addm(&length_to_next, current_line_length);
+                if (length_to_next > max_description_line_length)
+                {
+                    current_line_length = newline_indentation;
+                    os << std::endl;
+                    for (std::size_t i = 0; i < newline_indentation; i++)
+                    {
+                        os << (char_type)' ';
+                    }
+                }
+                else
+                {
+                    os << (char_type)' ';
+                    current_line_length++;
+                }
+            }
+            else
+            {
+                os << *it;
+                current_line_length++;
+            }
+        }
+    
+        os << std::endl;
     }
 
 private:
     /** Argument description content. */
     string_type text_;
 };
+
+
+/** Class that represents a text in the help information with 8 bits characters. */
+using help_text = basic_help_text<char>;
+
+
+/** Class that represents a text in the help information with 16 bits */
+using whelp_text = basic_help_text<wchar_t>;
 
 
 

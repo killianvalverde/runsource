@@ -132,6 +132,14 @@ public:
      */
     basic_help_arg& operator =(basic_help_arg&& rhs) = default;
 };
+
+
+/** Class that represents the option to get the help information with 8 bits characters. */
+using help_arg = basic_help_arg<char>;
+
+
+/** Class that represents the option to get the help information with 16 bits characters. */
+using whelp_arg = basic_help_arg<wchar_t>;
     
     
 }

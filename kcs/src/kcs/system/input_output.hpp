@@ -24,9 +24,34 @@
 #ifndef KCS_SYSTEM_INPUT_OUTPUT_HPP
 #define KCS_SYSTEM_INPUT_OUTPUT_HPP
 
+#include <iostream>
+
 
 namespace kcs {
 namespace system {
+
+
+enum class text_attribute
+{
+    NIL,
+    DEFAULT,
+    BLACK,
+    RED,
+    GREEN,
+    BROWN,
+    BLUE,
+    PURPLE,
+    CYAN,
+    LIGHT_GRAY,
+    DARK_GRAY,
+    LIGHT_RED,
+    LIGHT_GREEN,
+    YELLOW,
+    LIGHT_BLUE,
+    LIGHT_PURPLE,
+    LIGHT_CYAN,
+    WHITE
+};
 
 
 /**
@@ -35,6 +60,25 @@ namespace system {
  *              there will be no message printed.
  */
 void pause(const char *message);
+
+
+/**
+ * @brief       Set a stream text attribute.
+ * @param       stream : Stream in which set the attribute.
+ * @param       attribute : Attribute to set.
+ * @return      If function was successful 0 is returned, otherwise -1 is returned.
+ */
+int set_stream_text_attribute(::FILE *stream, text_attribute attribute);
+
+
+/**
+ * @brief       Set a Ostream text attribute.
+ * @param       os : Ostream in which set the attribute.
+ * @param       attribute : Attribute to set.
+ * @return      If function was successful 0 is returned, otherwise -1 is returned.
+ */
+int set_ostream_text_attribute(std::ostream& os, text_attribute attribute);
+// todo : implement error management.
 
 
 }

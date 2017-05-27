@@ -24,6 +24,7 @@
 #ifndef KCS_SYSTEM_HPP
 #define KCS_SYSTEM_HPP
 
+#include "system/filesystem.hpp"
 #include "system/input_output.hpp"
 #include "system/process.hpp"
 

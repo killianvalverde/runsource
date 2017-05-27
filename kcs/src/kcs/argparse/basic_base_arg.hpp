@@ -24,8 +24,9 @@
 #ifndef KCS_ARGPARSE_BASIC_COMMAND_ARG_HPP
 #define KCS_ARGPARSE_BASIC_COMMAND_ARG_HPP
 
-#include "../lowlevel/arithmetic_operations.hpp"
 #include "../iostream/basic_ostream.hpp"
+#include "../lowlevel/arithmetic_operations.hpp"
+#include "../system/input_output.hpp"
 #include "arg_error_flags.hpp"
 #include "arg_flags.hpp"
 #include "ibasic_help_text.hpp"
@@ -285,62 +286,79 @@ public:
     
     /**
      * @brief       Print the argument information for help menu.
+     * @param       max_description_line_length : The maximum arguments description length that will
+     *              be printed in a single line.
+     * @param       newline_indentation : The indentation used when a newline is found.
+     * @param       current_line_length : The length of the current line.
      */
-    void print_help_text() const override
+    void print_help_text(
+            std::size_t max_description_line_length,
+            std::size_t newline_indentation,
+            std::size_t current_line_length
+    ) const override
     {
         if (description_.empty())
         {
             return;
         }
-        
-        auto& os = kcs::iostream::get_cout<char_type>();
-        
-        os << description_ << std::endl;
-    }
     
-    /**
-     * @brief       Print argument description in standard output.
-     * @param       indentation : Indentation used to separate help description from the left part
-     *              of the display.
-     * @param       newline_indentation : The indentation used to print the rest of the description
-     *              in a new line.
-     */
-    void print_description(std::size_t indentation, std::size_t newline_indentation) const
-    {
-        if (description_.empty())
-        {
-            return;
-        }
-        
         auto& os = kcs::iostream::get_cout<char_type>();
-        
+        std::size_t length_to_next;
+    
         for (auto it = description_.cbegin(); it != description_.cend(); it++)
         {
             if (*it == (char_type)'\n')
             {
+                current_line_length = newline_indentation;
                 os << std::endl;
-                
-                for (std::size_t i = kcs::lowlevel::addm(indentation, newline_indentation);
-                     i > 0;
-                     i--)
+                for (std::size_t i = 0; i < newline_indentation; i++)
                 {
                     os << (char_type)' ';
+                }
+            }
+            else if (*it == (char_type)' ')
+            {
+                length_to_next = 1;
+    
+                auto aux_it = it;
+                aux_it++;
+                for (; aux_it != description_.cend() && *aux_it != ' '; aux_it++)
+                {
+                    length_to_next++;
+                }
+            
+                kcs::lowlevel::try_addm(&length_to_next, current_line_length);
+                if (length_to_next > max_description_line_length)
+                {
+                    current_line_length = newline_indentation;
+                    os << std::endl;
+                    for (std::size_t i = 0; i < newline_indentation; i++)
+                    {
+                        os << (char_type)' ';
+                    }
+                }
+                else
+                {
+                    os << (char_type)' ';
+                    current_line_length++;
                 }
             }
             else
             {
                 os << *it;
+                current_line_length++;
             }
         }
-        
+    
         os << std::endl;
     }
     
     /**
      * @brief       Print argument errors in standard output.
      * @param       program_name : The name of the program.
+     * @param       colors_enable : If it is true, colors will be used during the print.
      */
-    virtual void print_errors(const string_type& program_name) const
+    virtual void print_errors(const string_type& program_name, bool colors_enable) const
     {
         auto& os = kcs::iostream::get_cout<char_type>();
         
@@ -349,7 +367,18 @@ public:
             os << program_name << ": ";
             if (!get_error_id().empty())
             {
-                os << get_error_id() << ": ";
+                if (colors_enable)
+                {
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::LIGHT_RED);
+                    os << get_error_id() << ": ";
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::DEFAULT);
+                }
+                else
+                {
+                    os << get_error_id() << ": ";
+                }
             }
             os << "Option is allways required" << std::endl;
         }
@@ -358,7 +387,18 @@ public:
             os << program_name << ": ";
             if (!get_error_id().empty())
             {
-                os << get_error_id() << ": ";
+                if (colors_enable)
+                {
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::LIGHT_RED);
+                    os << get_error_id() << ": ";
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::DEFAULT);
+                }
+                else
+                {
+                    os << get_error_id() << ": ";
+                }
             }
             os << "Option has appeared more than once" << std::endl;
         }
@@ -370,10 +410,12 @@ public:
      *              be detected by the argument parser.
      * @param       error_message : The message to print in the standard output.
      * @param       program_name : The name of the program.
+     * @param       colors_enable : If it is true, colors will be used during the print.
      */
     void print_error_message(
             const string_type& error_message,
-            const string_type& program_name
+            const string_type& program_name,
+            bool colors_enable
     ) const
     {
         auto& os = kcs::iostream::get_cout<char_type>();
@@ -381,7 +423,18 @@ public:
         os << program_name << ": ";
         if (!get_error_id().empty())
         {
-            os << get_error_id() << ": ";
+            if (colors_enable)
+            {
+                kcs::system::set_ostream_text_attribute(
+                        os, kcs::system::text_attribute::LIGHT_RED);
+                os << get_error_id() << ": ";
+                kcs::system::set_ostream_text_attribute(
+                        os, kcs::system::text_attribute::DEFAULT);
+            }
+            else
+            {
+                os << get_error_id() << ": ";
+            }
         }
         os << error_message << std::endl;
     }
@@ -441,15 +494,20 @@ public:
     
     /**
      * @brief       Print the argument information for help menu.
+     * @param       max_description_line_length : The maximum arguments description length that will
+     *              be printed in a single line.
+     * @param       newline_indentation : The indentation used when a newline is found.
+     * @param       keys_indentation : Indentation used to separate keys help descriptions during
+     *              the print.
      * @param       short_id_length : The maximum length of the short keys.
      * @param       long_id_length : The maximum length of the long keys.
-     * @param       indentation : Indentation used to separate keys help descriptions during the
-     *              print.
      */
     virtual void print_help_text(
+            std::size_t max_description_line_length,
+            std::size_t newline_indentation,
+            std::size_t keys_indentation,
             std::size_t short_id_length,
-            std::size_t long_id_length,
-            std::size_t indentation
+            std::size_t long_id_length
     ) const /*= 0;*/
     {
     }
@@ -504,11 +562,11 @@ private:
 };
 
 
-/** Class that represents the base of the arguments hierarchy with 8 bits characters.  */
+/** Class that represents the base of the arguments hierarchy with 8 bits characters. */
 using base_arg = basic_base_arg<char>;
 
 
-/** Class that represents the base of the arguments hierarchy with 16 bits characters.  */
+/** Class that represents the base of the arguments hierarchy with 16 bits characters. */
 using wbase_arg = basic_base_arg<wchar_t>;
     
     

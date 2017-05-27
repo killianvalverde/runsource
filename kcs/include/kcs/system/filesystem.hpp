@@ -15,27 +15,40 @@
    along with KCS. If not, see <http://www.gnu.org/licenses/>. */
 
 /**
- * @file        kcs/system.hpp
- * @brief       system fonctions header.
+ * @file        kcs/system/filesystem.hpp
+ * @brief       filesystem fonctions header.
  * @author      Killian
- * @date        2017/01/08 - 16:37
+ * @date        2017/05/26 - 17:20
  */
 
-#ifndef KCS_SYSTEM_HPP
-#define KCS_SYSTEM_HPP
+#ifndef KCS_SYSTEM_FILESYSTEM_HPP
+#define KCS_SYSTEM_FILESYSTEM_HPP
 
-#include "system/filesystem.hpp"
-#include "system/input_output.hpp"
-#include "system/process.hpp"
+#ifdef __unix__
+#include <unistd.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#endif
 
 
 namespace kcs {
+namespace system {
 
 
 /**
- * @brief       Contains resources for interact with the system.
+ * @brief       Change the current execution directory.
+ * @param       path : The path of the new current directory.
+ * @return      If function was successful 0 is returned, otherwise -1 is returned and and errno may
+ *              be set to indicate the error
  */
-namespace system {
+inline int chdir(const char* path) noexcept
+{
+#if _POSIX_VERSION >= 200112L
+    return ::chdir(path);
+#else
+#error "system not supported"
+#endif
+}
 
 
 }

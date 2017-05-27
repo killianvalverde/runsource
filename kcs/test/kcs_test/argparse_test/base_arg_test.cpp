@@ -167,42 +167,17 @@ TEST(base_arg_test, print_help_text_test)
             "Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.";
     
     std::string expected_result = "Usage: ls [OPTION]... [FILE]...\n"
-            "List information about the FILEs (the current directory by default).\n"
-            "Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.\n";
+            "  List information about the FILEs (the current directory by default).\n"
+            "  Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.\n";
     
     kap::base_arg base_arg(description, "error_id", kap::af_t::DEFAULT_ARG_FLAGS);
-    base_arg.print_help_text();
+    base_arg.print_help_text(80, 2, 0);
     EXPECT_TRUE(ios_redirect.get_embedded_stringstream_str() == expected_result);
     
     ios_redirect.clear_embedded_stringstream();
     
     base_arg = kap::base_arg("", "error_id", kap::af_t::DEFAULT_ARG_FLAGS);
-    base_arg.print_help_text();
-    EXPECT_TRUE(ios_redirect.get_embedded_stringstream_str().empty());
-}
-
-
-TEST(base_arg_test, print_description_test)
-{
-    kios::ios_redirect ios_redirect(std::cout);
-    ios_redirect.redirect_to_embedded_stringstream();
-    
-    std::string description = "Usage: ls [OPTION]... [FILE]...\n"
-            "List information about the FILEs (the current directory by default).\n"
-            "Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.";
-    
-    std::string expected_result = "Usage: ls [OPTION]... [FILE]...\n"
-            "      List information about the FILEs (the current directory by default).\n"
-            "      Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.\n";
-    
-    kap::base_arg base_arg(description, "error_id", kap::af_t::DEFAULT_ARG_FLAGS);
-    base_arg.print_description(2, 4);
-    EXPECT_TRUE(ios_redirect.get_embedded_stringstream_str() == expected_result);
-    
-    ios_redirect.clear_embedded_stringstream();
-    
-    base_arg = kap::base_arg("", "error_id", kap::af_t::DEFAULT_ARG_FLAGS);
-    base_arg.print_description(2, 4);
+    base_arg.print_help_text(80, 2, 0);
     EXPECT_TRUE(ios_redirect.get_embedded_stringstream_str().empty());
 }
 
@@ -218,13 +193,13 @@ TEST(base_arg_test, print_errors_test)
     kap::base_arg base_arg("description", "error", kap::af_t::DEFAULT_ARG_FLAGS);
     base_arg.raise_error_flag(kap::aef_t::ALLWAYS_REQUIRED_ERROR |
                                       kap::aef_t::APPEAR_JUST_ONCE_ERROR);
-    base_arg.print_errors("kcs");
+    base_arg.print_errors("kcs", false);
     EXPECT_TRUE(ios_redirect.get_embedded_stringstream_str() == expected_result);
     
     ios_redirect.clear_embedded_stringstream();
     
     base_arg.clear_error_flags();
-    base_arg.print_errors("kcs");
+    base_arg.print_errors("kcs", false);
     EXPECT_TRUE(ios_redirect.get_embedded_stringstream_str().empty());
 }
 
@@ -237,7 +212,7 @@ TEST(base_arg_test, print_error_message_test)
     std::string expected_result = "kcs: error: Warning\n";
     
     kap::base_arg base_arg("description", "error", kap::af_t::DEFAULT_ARG_FLAGS);
-    base_arg.print_error_message("Warning", "kcs");
+    base_arg.print_error_message("Warning", "kcs", false);
     EXPECT_TRUE(ios_redirect.get_embedded_stringstream_str() == expected_result);
 }
 

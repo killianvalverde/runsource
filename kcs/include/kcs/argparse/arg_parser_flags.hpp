@@ -58,12 +58,12 @@ enum class arg_parser_flags : std::uint16_t
     /** The common 'usage' sentence will be printed in the beginning of the help information. */
     PRINT_USAGE_ON_PRINT_HELP = 0x20,
     
-    /** The common 'Options' sentence will be printed in the beginning of the help information.  */
-    PRINT_OPTIONS_ON_PRINT_HELP = 0x40,
-    
     /** When the help information will be printed, the arguments keys or help ids will be printed
      * before the description. */
-    PRINT_ARGS_ID_ON_PRINT_HELP = 0x80,
+    PRINT_ARGS_ID_ON_PRINT_HELP = 0x40,
+    
+    /** Use colors to print arguments errors. */
+    USE_COLORS_ON_PRINT_ERRORS = 0x80,
     
     /** The foreign arguments values cannot be added if the value contains one of the prefixes. */
     FOREIGN_VALUE_ARG_CANNOT_BE_ADDED_WITH_PREFIX = 0x100,
@@ -78,7 +78,7 @@ enum class arg_parser_flags : std::uint16_t
     EXIT_ON_PRINT_ARGS_ERRORS = 0x800,
     
     /** All argument parser flags. */
-    FULL_ARG_PARSER_FLAGS = 0xFFF,
+    FULL_ARG_PARSER_FLAGS = 0xFFFF,
     
     /** The default flags used by the argument parser. */
     DEFAULT_ARG_PARSER_FLAGS = (
@@ -88,6 +88,7 @@ enum class arg_parser_flags : std::uint16_t
             PRINT_TRY_HELP_ON_ERRORS |
             PRINT_USAGE_ON_PRINT_HELP |
             PRINT_ARGS_ID_ON_PRINT_HELP |
+            USE_COLORS_ON_PRINT_ERRORS |
             FOREIGN_VALUE_ARG_CANNOT_BE_ADDED_WITH_PREFIX |
             EXIT_ON_PRINT_HELP |
             EXIT_ON_PRINT_VERSION |

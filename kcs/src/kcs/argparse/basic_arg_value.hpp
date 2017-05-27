@@ -31,9 +31,10 @@
 #include <system_error>
 
 #include "../filesystem/filesystem.hpp"
-#include "../lowlevel/flags_container.hpp"
 #include "../iostream/basic_ostream.hpp"
+#include "../lowlevel/flags_container.hpp"
 #include "../stringutils/stringutils.hpp"
+#include "../system/input_output.hpp"
 #include "../system/process.hpp"
 #include "../type_casting/type_cast.hpp"
 #include "arg_error_flags.hpp"
@@ -61,9 +62,6 @@ template<
 >
 class basic_arg_value
 {
-    /** @relates    kcs::argparser::basic_arg_value */
-    friend class kcs::argparse::basic_value_arg<TpChar, TpCharTraits, TpAlloc>;
-    
 public:
     /** Fundamental type that represents character type used in the class. */
     using char_type = TpChar;
@@ -431,14 +429,18 @@ public:
     {
         return !error_flags_.is_empty();
     }
-
-private:
+    
     /**
      * @brief       Print argument value errors.
      * @param       program_name : The name of the program.
      * @param       error_id : The argument error id.
+     * @param       colors_enable : If it is true, colors will be used during the print.
      */
-    void print_errors(const string_type& program_name, const string_type& error_id) const
+    void print_errors(
+            const string_type& program_name,
+            const string_type& error_id,
+            bool colors_enable
+    ) const
     {
         auto& os = kcs::iostream::get_cout<TpChar>();
         
@@ -450,12 +452,37 @@ private:
                 (!invalid_path_ ||
                  composite_flags_.flag_is_raised(arg_flags::PRINT_ERROR_ID_ON_PATH_ERROR)))
             {
-                os << error_id << ": ";
+                if (colors_enable)
+                {
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::LIGHT_RED);
+                    os << error_id << ": ";
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::DEFAULT);
+                }
+                else
+                {
+                    os << error_id << ": ";
+                }
             }
             
             if (invalid_path_)
             {
-                os << value_ << ": " << error_message_ << std::endl;
+                if ((error_id.empty() ||
+                     !composite_flags_.flag_is_raised(arg_flags::PRINT_ERROR_ID_ON_PATH_ERROR)) &&
+                    colors_enable)
+                {
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::LIGHT_RED);
+                    os << value_ << ":";
+                    kcs::system::set_ostream_text_attribute(
+                            os, kcs::system::text_attribute::DEFAULT);
+                    os << " " << error_message_ << std::endl;
+                }
+                else
+                {
+                    os << value_ << ": " << error_message_ << std::endl;
+                }
             }
             else
             {
@@ -463,7 +490,8 @@ private:
             }
         }
     }
-    
+
+private:
     /**
      * @brief       Allows knowing wether the value can be coverted to the specified type.
      * @return      If function was successful true is returned, otherwise false is returned.

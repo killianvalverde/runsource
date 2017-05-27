@@ -35,13 +35,15 @@ TEST(arg_parser_test, perfect_forwarding_constructor_test)
 {
     kap::arg_parser ap1();
     kap::arg_parser ap2("kcs");
-    kap::arg_parser ap3("kcs", {"-"}, {"--"}, 2u, ~0u,
+    kap::arg_parser ap3("kcs", {"-"}, {"--"}, 2u, 80u, 2u, ~0u,
                                  kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);;
     
     std::string program_name = "kcs";
     std::unordered_set<std::string> short_prefixes = {"-"};
     std::unordered_set<std::string> long_prefixes = {"--"};
     std::size_t key_help_description_indentation = 2u;
+    std::size_t max_description_line_length = 80u;
+    std::size_t newline_indentation = 2u;
     std::size_t max_unrecognized_args = ~2u;
     kap::apf_t flags = kap::apf_t::DEFAULT_ARG_PARSER_FLAGS;
     
@@ -49,6 +51,8 @@ TEST(arg_parser_test, perfect_forwarding_constructor_test)
                         short_prefixes,
                         long_prefixes,
                         key_help_description_indentation,
+                        max_description_line_length,
+                        newline_indentation,
                         max_unrecognized_args,
                         flags);
     
@@ -60,6 +64,8 @@ TEST(arg_parser_test, perfect_forwarding_constructor_test)
                         std::move(short_prefixes),
                         std::move(long_prefixes),
                         std::move(key_help_description_indentation),
+                        std::move(max_description_line_length),
+                        std::move(newline_indentation),
                         std::move(max_unrecognized_args),
                         std::move(flags));
     
@@ -74,6 +80,8 @@ TEST(arg_parser_test, parameters_constructor_test)
     kap::arg_parser ap(kap::arg_parser::constructor_params::get()
                                        .flags(kap::apf_t::DEFAULT_ARG_PARSER_FLAGS)
                                        .max_unrecognized_args(~0u)
+                                       .newline_indentation(2)
+                                       .max_description_line_length(80)
                                        .key_help_description_indentation(2)
                                        .long_prefixes({"--"})
                                        .short_prefixes({"-"})
@@ -83,14 +91,16 @@ TEST(arg_parser_test, parameters_constructor_test)
 
 TEST(arg_parser_test, copy_constructor_test)
 {
-    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 2u, ~0u, kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
+    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 2u, 80u, 2u, ~0u,
+                        kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
     kap::arg_parser ap2(ap1);
 }
 
 
 TEST(arg_parser_test, move_constructor_test)
 {
-    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 4u, ~2u, kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
+    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 4u, 100u, 4u, ~2u,
+                        kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
     kap::arg_parser ap2(std::move(ap1));
 }
 
@@ -98,15 +108,17 @@ TEST(arg_parser_test, move_constructor_test)
 TEST(arg_parser_test, copy_assignment_operator_test)
 {
     kap::arg_parser ap1;
-    kap::arg_parser ap2("kcs", {"-"}, {"/"}, 2u, ~0u, kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
+    kap::arg_parser ap2("kcs", {"-"}, {"/"}, 2u, 80u, 2u, ~0u,
+                        kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
     ap1 = ap2;
 }
 
 
 TEST(arg_parser_test, move_assignment_operator_test)
 {
-    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 2u, ~0u, kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
-    kap::arg_parser ap2("kcs_", {"/"}, {"//"}, 4u, 1u, kap::apf_t::NULL_ARG_PARSER_FLAGS);
+    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 2u, 80u, 2u, ~0u,
+                        kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
+    kap::arg_parser ap2("kcs_", {"/"}, {"//"}, 4u, 100u, 4u, 1u, kap::apf_t::NULL_ARG_PARSER_FLAGS);
     ap1 = std::move(ap2);
 }
 

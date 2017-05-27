@@ -181,14 +181,23 @@ public:
     /**
      * @brief       Print argument errors in standard output.
      * @param       program_name : The name of the program.
+     * @param       colors_enable : If it is true, colors will be used during the print.
      */
-    void print_errors(const string_type& program_name) const override
+    void print_errors(const string_type& program_name, bool colors_enable) const override
     {
-        value_arg_type::print_errors(program_name);
+        value_arg_type::print_errors(program_name, colors_enable);
     }
 };
-    
-    
+
+
+/** Class that represents arguments that have keys and values with 8 bits characters. */
+using key_value_arg = basic_key_value_arg<char>;
+
+
+/** Class that represents arguments that have keys and values with 16 bits characters. */
+using wkey_value_arg = basic_key_value_arg<wchar_t>;
+
+
 }
 }
 
