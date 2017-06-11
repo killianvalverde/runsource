@@ -134,9 +134,9 @@ int main(int argc, char *argv[])
             c_standard,
             cpp_standard,
             tool_chain,
-            std::move(ap.get_arg_values_as<std::string>("--compiler-args")),
-            std::move(ap.get_arg_values_as<std::string>("--program-args")),
-            std::move(ap.get_arg_values_as<stdfs::path>("FILE"))
+            ap.get_arg_values_as<std::string>("--compiler-args"),
+            ap.get_arg_values_as<std::string>("--program-args"),
+            ap.get_arg_values_as<stdfs::path>("FILE")
     );
     result = rns.exec();
     
