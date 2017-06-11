@@ -34,10 +34,10 @@ namespace argparse {
 /**
  * @brief       Contains all argument flags constants.
  */
-enum class arg_flags : std::uint16_t
+enum class arg_flags : std::uint8_t
 {
     /** Null flag. */
-    NULL_ARG_FLAGS = 0x0,
+    NIL = 0x0,
     
     /** The argument allways has to be present in the program call. */
     ALLWAYS_REQUIRED = 0x1,
@@ -66,7 +66,7 @@ enum class arg_flags : std::uint16_t
     PRINT_ERROR_ID_ON_PATH_ERROR = 0x80,
     
     /** All argument flags. */
-    FULL_ARG_FLAGS = 0xFF,
+    ALL = 0xFF,
     
     /** The default flags used for the arguments. */
     DEFAULT_ARG_FLAGS = (

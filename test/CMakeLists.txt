@@ -15,8 +15,8 @@ include_directories(${CMAKE_SOURCE_DIR}/kcs/include)
 set(SOURCE_FILES
         main.cpp
         build_manger_test.cpp
-        ../src/program.cpp
-        ../src/program.hpp
+        ../src/runsource_entry.cpp
+        ../src/runsource_entry.hpp
         ../src/language.hpp
         )
 

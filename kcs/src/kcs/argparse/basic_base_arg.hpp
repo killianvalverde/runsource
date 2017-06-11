@@ -81,7 +81,7 @@ public:
             , parsed_(false)
             , found_(false)
             , flags_(flags)
-            , error_flags_(arg_error_flags::NULL_ARG_ERROR_FLAGS)
+            , error_flags_(arg_error_flags::NIL)
     {
     }
     
@@ -286,13 +286,14 @@ public:
     
     /**
      * @brief       Print the argument information for help menu.
-     * @param       max_description_line_length : The maximum arguments description length that will
-     *              be printed in a single line.
-     * @param       newline_indentation : The indentation used when a newline is found.
+     * @param       max_line_length : The maximum description length that will be printed in a
+     *              single line.
+     * @param       newline_indentation : The indentation used when a newline is found in a
+     *              description.
      * @param       current_line_length : The length of the current line.
      */
     void print_help_text(
-            std::size_t max_description_line_length,
+            std::size_t max_line_length,
             std::size_t newline_indentation,
             std::size_t current_line_length
     ) const override
@@ -328,7 +329,7 @@ public:
                 }
             
                 kcs::lowlevel::try_addm(&length_to_next, current_line_length);
-                if (length_to_next > max_description_line_length)
+                if (length_to_next > max_line_length)
                 {
                     current_line_length = newline_indentation;
                     os << std::endl;
@@ -494,18 +495,18 @@ public:
     
     /**
      * @brief       Print the argument information for help menu.
-     * @param       max_description_line_length : The maximum arguments description length that will
-     *              be printed in a single line.
-     * @param       newline_indentation : The indentation used when a newline is found.
-     * @param       keys_indentation : Indentation used to separate keys help descriptions during
-     *              the print.
+     * @param       args_indentation : Indentation used to print arguments help description.
+     * @param       max_line_length : The maximum description length that will be printed in a
+     *              single line.
+     * @param       newline_indentation : The indentation used when a newline is found in a
+     *              description.
      * @param       short_id_length : The maximum length of the short keys.
      * @param       long_id_length : The maximum length of the long keys.
      */
     virtual void print_help_text(
-            std::size_t max_description_line_length,
+            std::size_t args_indentation,
+            std::size_t max_line_length,
             std::size_t newline_indentation,
-            std::size_t keys_indentation,
             std::size_t short_id_length,
             std::size_t long_id_length
     ) const /*= 0;*/

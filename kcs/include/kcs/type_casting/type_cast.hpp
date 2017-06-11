@@ -33,4 +33,33 @@
 #include "c_string_to_path.hpp"
 
 
+namespace kcs {
+namespace type_casting {
+
+
+/**
+ * @brief       Convert a C string into a integral unsigned type.
+ * @param       arg : The value to convert.
+ * @param       default_value : The value returned if the conversion fails.
+ * @return      If function was successful the C string converted into a integral unsigned type is
+ *              returned, otherwise the default value specified is returned.
+ */
+template<typename TpTarget, typename TpSource>
+TpTarget type_cast(const TpSource& arg, TpTarget&& default_value)
+{
+    TpTarget target;
+    
+    if (try_type_cast(arg, target))
+    {
+        return target;
+    }
+    
+    return default_value;
+}
+
+
+}
+}
+
+
 #endif

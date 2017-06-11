@@ -37,7 +37,7 @@ namespace argparse {
 enum class arg_parser_error_flags : std::uint8_t
 {
     /** Null flag. */
-    NULL_ARG_PARSER_ERROR_FLAGS = 0x0,
+    NIL = 0x0,
     
     /** The argument parser has arguments errors. */
     ARGS_ERROR = 0x1,
@@ -47,7 +47,7 @@ enum class arg_parser_error_flags : std::uint8_t
     UNRECOGNIZED_ARGS_ERROR = 0x2,
     
     /** All argument parser error flags. */
-    FULL_ARG_PARSER_ERROR_FLAGS = 0x3
+    ALL = 0x3
 };
 
 

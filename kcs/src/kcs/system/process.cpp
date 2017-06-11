@@ -15,24 +15,19 @@
    along with KCS. If not, see <http://www.gnu.org/licenses/>. */
 
 /**
- * @file        kcs/system/process.hpp
- * @brief       process fonctions header.
+ * @file        kcs/system/process.cpp
+ * @brief       process functions source.
  * @author      Killian
  * @date        2017/01/08 - 16:37
  */
 
-#ifndef KCS_SYSTEM_PROCESS_HPP
-#define KCS_SYSTEM_PROCESS_HPP
-
 #ifdef __unix__
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 #elif defined(_WIN32)
 #include <windows.h>
 #endif
 
-#include <experimental/filesystem>
+#include "process.hpp"
 
 
 namespace kcs {
@@ -43,18 +38,29 @@ namespace system {
  * @brief       Get the UID of the current process.
  * @return      The UID of the current process.
  */
-int get_uid();
+int get_uid()
+{
+#if _POSIX_VERSION >= 200112L
+    return ::getuid();
+#else
+    throw system_exception("kcs::system::system_exception: system not supported");
+#endif
+}
 
 
 /**
  * @brief       Get the GID of the current process.
  * @return      The GID of the current process.
  */
-int get_gid();
-
-
-}
-}
-
-
+int get_gid()
+{
+#if _POSIX_VERSION >= 200112L
+    return ::getgid();
+#else
+    throw system_exception("kcs::system::system_exception: system not supported");
 #endif
+}
+
+
+}
+}

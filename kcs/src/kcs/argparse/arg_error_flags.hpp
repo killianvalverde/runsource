@@ -39,7 +39,7 @@ namespace argparse {
 enum class arg_error_flags : std::uint8_t
 {
     /** Null flag. */
-    NULL_ARG_ERROR_FLAGS = 0x0,
+    NIL = 0x0,
     
     /** The minimum number of values for an option was not obtained. */
     MIN_VALUES_ERROR = 0x1,
@@ -57,7 +57,7 @@ enum class arg_error_flags : std::uint8_t
     APPEAR_JUST_ONCE_ERROR = 0x10,
     
     /** All argument error flags. */
-    FULL_ARG_ERROR_FLAGS = 0x1F
+    ALL = 0x1F
 };
 
 

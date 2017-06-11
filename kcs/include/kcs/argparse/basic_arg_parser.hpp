@@ -27,7 +27,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "../filesystem/filesystem.hpp"
 #include "../lowlevel/flags_container.hpp"
 #include "../stringutils/stringutils.hpp"
 #include "arg_parser_error_flags.hpp"
@@ -144,9 +143,10 @@ public:
             instance.program_name_ = string_type();
             instance.short_prefixes_ = {kcs::type_casting::type_cast<string_type>("-")};
             instance.long_prefixes_ = {kcs::type_casting::type_cast<string_type>("--")};
-            instance.key_help_description_indentation_ = 2u;
+            instance.arg_description_indentation_ = 2u;
             instance.max_description_line_length_ = 80u;
-            instance.newline_indentation_ = 2u;
+            instance.description_newline_indentation_ = 2u;
+            instance.error_id_ = string_type();
             instance.max_unrecognized_args_ = std::numeric_limits<std::size_t>::max();
             instance.flags_ = arg_parser_flags::DEFAULT_ARG_PARSER_FLAGS;
             
@@ -191,22 +191,20 @@ public:
     
         /**
          * @brief       Set the key help description indentation.
-         * @param       key_help_description_indentation : Indentation used to print keys arguments
-         *              help description.
+         * @param       arg_description_indentation : Indentation used to print arguments help
+         *              description.
          * @return      The object who call the method.
          */
-        constructor_params& key_help_description_indentation(
-                std::size_t key_help_description_indentation
-        )
+        constructor_params& arg_description_indentation(std::size_t arg_description_indentation)
         {
-            key_help_description_indentation_ = key_help_description_indentation;
+            arg_description_indentation_ = arg_description_indentation;
             return *this;
         }
     
         /**
          * @brief       Set the maximum description line length.
-         * @param       max_description_line_length : The maximum arguments description length that
-         *              will be printed in a single line.
+         * @param       max_description_line_length : The maximum description length that will be
+         *              printed in a single line.
          * @return      The object who call the method.
          */
         constructor_params& max_description_line_length(std::size_t max_description_line_length)
@@ -217,12 +215,26 @@ public:
     
         /**
          * @brief       Set the newline indentation length.
-         * @param       newline_indentation : The indentation used when a newline is found.
+         * @param       description_newline_indentation : The indentation used when a newline is
+         *              found in a description.
          * @return      The object who call the method.
          */
-        constructor_params& newline_indentation(std::size_t newline_indentation)
+        constructor_params& description_newline_indentation(
+                std::size_t description_newline_indentation
+        )
         {
-            newline_indentation_ = newline_indentation;
+            description_newline_indentation_ = description_newline_indentation;
+            return *this;
+        }
+    
+        /**
+         * @brief       Set the error id.
+         * @param       error_id : Error id that will be used for global errors.
+         * @return      The object who call the method.
+         */
+        constructor_params& error_id(string_type error_id)
+        {
+            error_id_ = error_id;
             return *this;
         }
     
@@ -263,9 +275,10 @@ public:
         string_type program_name_;
         unordered_set_type<string_type> short_prefixes_;
         unordered_set_type<string_type> long_prefixes_;
-        std::size_t key_help_description_indentation_;
+        std::size_t arg_description_indentation_;
         std::size_t max_description_line_length_;
-        std::size_t newline_indentation_;
+        std::size_t description_newline_indentation_;
+        string_type error_id_;
         std::size_t max_unrecognized_args_;
         arg_parser_flags flags_;
         
@@ -586,11 +599,13 @@ public:
      * @param       program_name : The program name.
      * @param       short_prefixes : Collection that contains the arguments short prefixes.
      * @param       long_prefixes : Collection that contains the arguments long prefixes.
-     * @param       key_help_description_indentation : Indentation used to print keys arguments help
+     * @param       arg_description_indentation : Indentation used to print arguments help
      *              description.
-     * @param       max_description_line_length : The maximum arguments description length that will
-     *              be printed in a single line.
-     * @param       newline_indentation : The indentation used when a newline is found.
+     * @param       max_description_line_length : The maximum description length that will be
+     *              printed in a single line.
+     * @param       description_newline_indentation : The indentation used when a newline is found
+     *              in a description.
+     * @param       error_id : The argument parser error id.
      * @param       max_unrecognized_args : The muximum number of unrecognized arguments that will
      *              be catched.
      * @param       flags : Flags that dictates the argument parser behavior.
@@ -607,28 +622,35 @@ public:
             TpString_&& program_name = string_type(),
             TpStringSet1_&& short_prefixes = {kcs::type_casting::type_cast<string_type>("-")},
             TpStringSet2_&& long_prefixes = {kcs::type_casting::type_cast<string_type>("--")},
-            std::size_t key_help_description_indentation = 2u,
+            std::size_t arg_description_indentation = 2u,
             std::size_t max_description_line_length = 80u,
-            std::size_t newline_indentation = 2u,
+            std::size_t description_newline_indentation = 2u,
+            string_type error_id = string_type(),
             std::size_t max_unrecognized_args = std::numeric_limits<std::size_t>::max(),
             arg_parser_flags flags = arg_parser_flags::DEFAULT_ARG_PARSER_FLAGS
     )
             : program_name_(std::forward<TpString_>(program_name))
             , short_prefixes_(std::forward<TpStringSet1_>(short_prefixes))
             , long_prefixes_(std::forward<TpStringSet2_>(long_prefixes))
-            , key_help_description_indentation_(key_help_description_indentation)
+            , arg_description_indentation_(arg_description_indentation)
             , max_description_line_length_(max_description_line_length)
-            , newline_indentation_(newline_indentation)
+            , description_newline_indentation_(description_newline_indentation)
             , ihelp_text_list_()
             , current_help_arg_(nullptr)
             , current_version_arg_(nullptr)
             , foreign_args_list_()
             , base_arg_map_()
+            , error_id_(error_id)
             , unrecognized_args_()
             , max_unrecognized_args_(max_unrecognized_args)
             , flags_(flags)
-            , error_flags_(arg_parser_error_flags::NULL_ARG_PARSER_ERROR_FLAGS)
+            , error_flags_(arg_parser_error_flags::NIL)
     {
+        if (error_id_.empty() &&
+            flags_.flag_is_raised(arg_parser_flags::USE_DEFAULT_ERROR_ID_IF_ERROR_ID_EMPTY))
+        {
+            error_id_ = "error";
+        }
     }
     
     /**
@@ -640,18 +662,25 @@ public:
             : program_name_(std::move(constructor_params.program_name_))
             , short_prefixes_(std::move(constructor_params.short_prefixes_))
             , long_prefixes_(std::move(constructor_params.long_prefixes_))
-            , key_help_description_indentation_(std::move(
-                    constructor_params.key_help_description_indentation_))
+            , arg_description_indentation_(constructor_params.arg_description_indentation_)
+            , max_description_line_length_(constructor_params.max_description_line_length_)
+            , description_newline_indentation_(constructor_params.description_newline_indentation_)
             , ihelp_text_list_()
             , current_help_arg_(nullptr)
             , current_version_arg_(nullptr)
             , foreign_args_list_()
             , base_arg_map_()
+            , error_id_(std::move(constructor_params.error_id_))
             , unrecognized_args_()
-            , max_unrecognized_args_(std::move(constructor_params.max_unrecognized_args_))
-            , flags_(std::move(constructor_params.flags_))
-            , error_flags_(arg_parser_error_flags::NULL_ARG_PARSER_ERROR_FLAGS)
+            , max_unrecognized_args_(constructor_params.max_unrecognized_args_)
+            , flags_(constructor_params.flags_)
+            , error_flags_(arg_parser_error_flags::NIL)
     {
+        if (error_id_.empty() &&
+            flags_.flag_is_raised(arg_parser_flags::USE_DEFAULT_ERROR_ID_IF_ERROR_ID_EMPTY))
+        {
+            error_id_ = "error";
+        }
     }
     
     /**
@@ -662,12 +691,15 @@ public:
             : program_name_(rhs.program_name_)
             , short_prefixes_(rhs.short_prefixes_)
             , long_prefixes_(rhs.long_prefixes_)
-            , key_help_description_indentation_(rhs.key_help_description_indentation_)
+            , arg_description_indentation_(rhs.arg_description_indentation_)
+            , max_description_line_length_(rhs.max_description_line_length_)
+            , description_newline_indentation_(rhs.description_newline_indentation_)
             , ihelp_text_list_()
             , current_help_arg_(nullptr)
             , current_version_arg_(nullptr)
             , foreign_args_list_()
             , base_arg_map_()
+            , error_id_(rhs.error_id_)
             , unrecognized_args_(rhs.unrecognized_args_)
             , max_unrecognized_args_(rhs.max_unrecognized_args_)
             , flags_(rhs.flags_)
@@ -722,18 +754,21 @@ public:
             : program_name_(std::move(rhs.program_name_))
             , short_prefixes_(std::move(rhs.short_prefixes_))
             , long_prefixes_(std::move(rhs.long_prefixes_))
-            , key_help_description_indentation_(std::move(rhs.key_help_description_indentation_))
+            , arg_description_indentation_(std::move(rhs.arg_description_indentation_))
+            , max_description_line_length_(std::move(rhs.max_description_line_length_))
+            , description_newline_indentation_(std::move(rhs.description_newline_indentation_))
             , ihelp_text_list_(std::move(rhs.ihelp_text_list_))
             , current_help_arg_(std::move(rhs.current_help_arg_))
             , current_version_arg_(std::move(rhs.current_version_arg_))
             , foreign_args_list_(std::move(rhs.foreign_args_list_))
             , base_arg_map_(std::move(rhs.base_arg_map_))
+            , error_id_(std::move(rhs.error_id_))
             , unrecognized_args_(std::move(rhs.unrecognized_args_))
             , max_unrecognized_args_(std::move(rhs.max_unrecognized_args_))
             , flags_(std::move(rhs.flags_))
             , error_flags_(std::move(rhs.error_flags_))
     {
-        rhs.key_help_description_indentation_ = 0;
+        rhs.arg_description_indentation_ = 0;
         rhs.current_help_arg_ = nullptr;
         rhs.current_version_arg_ = nullptr;
         rhs.max_unrecognized_args_ = 0;
@@ -766,7 +801,10 @@ public:
             program_name_ = rhs.program_name_;
             short_prefixes_ = rhs.short_prefixes_;
             long_prefixes_ = rhs.long_prefixes_;
-            key_help_description_indentation_ = rhs.key_help_description_indentation_;
+            arg_description_indentation_ = rhs.arg_description_indentation_;
+            max_description_line_length_ = rhs.max_description_line_length_;
+            description_newline_indentation_ = rhs.description_newline_indentation_;
+            error_id_ = rhs.error_id_;
             unrecognized_args_ = rhs.unrecognized_args_;
             max_unrecognized_args_ = rhs.max_unrecognized_args_;
             flags_ = rhs.flags_;
@@ -827,12 +865,15 @@ public:
             program_name_ = std::move(rhs.program_name_);
             short_prefixes_ = std::move(rhs.short_prefixes_);
             long_prefixes_ = std::move(rhs.long_prefixes_);
-            std::swap(key_help_description_indentation_, rhs.key_help_description_indentation_);
+            std::swap(arg_description_indentation_, rhs.arg_description_indentation_);
+            std::swap(max_description_line_length_, rhs.max_description_line_length_);
+            std::swap(description_newline_indentation_, rhs.description_newline_indentation_);
             ihelp_text_list_ = std::move(rhs.ihelp_text_list_);
             std::swap(current_help_arg_, rhs.current_help_arg_);
             std::swap(current_version_arg_, rhs.current_version_arg_);
             foreign_args_list_ = std::move(rhs.foreign_args_list_);
             base_arg_map_ = std::move(rhs.base_arg_map_);
+            error_id_ = std::move(rhs.error_id_);
             unrecognized_args_ = std::move(rhs.unrecognized_args_);
             std::swap(max_unrecognized_args_, rhs.max_unrecognized_args_);
             flags_ = std::move(rhs.flags_);
@@ -1339,7 +1380,8 @@ public:
      * @param       key : Key of the argument to get.
      * @return      If function was successful the argument found is returned.
      * @throw       kcs::argparse::arg_parser_exception : If there isn't any argument with the
-     *              specified key an exception is thrown.
+     *              specified key or the argument can't be cast to the specified type an exception
+     *              is thrown.
      */
     const key_arg_type& get_key_arg(const string_type& key) const
     {
@@ -1347,7 +1389,14 @@ public:
         
         if (it != base_arg_map_.end())
         {
-            return *(dynamic_cast<key_arg_type*>(it->second));
+            key_arg_type *key_arg = dynamic_cast<key_arg_type*>(it->second);
+            if (key_arg == nullptr)
+            {
+                throw arg_parser_exception("kcs::argparse::arg_parser_exception: the argument c'ant"
+                                                   " be cast to the specified type");
+            }
+            
+            return *key_arg;
         }
     
         throw arg_parser_exception("kcs::argparse::arg_parser_exception: there isn't any "
@@ -1359,7 +1408,8 @@ public:
      * @param       key : Key of the argument to get.
      * @return      If function was successful the argument found is returned.
      * @throw       kcs::argparse::arg_parser_exception : If there isn't any argument with the
-     *              specified key an exception is thrown.
+     *              specified key or the argument can't be cast to the specified type an exception
+     *              is thrown.
      */
     const value_arg_type& get_value_arg(const string_type& key) const
     {
@@ -1367,7 +1417,14 @@ public:
         
         if (it != base_arg_map_.end())
         {
-            return *(dynamic_cast<value_arg_type*>(it->second));
+            value_arg_type *value_arg = dynamic_cast<value_arg_type*>(it->second);
+            if (value_arg == nullptr)
+            {
+                throw arg_parser_exception("kcs::argparse::arg_parser_exception: the argument c'ant"
+                                                   " be cast to the specified type");
+            }
+    
+            return *value_arg;
         }
     
         throw arg_parser_exception("kcs::argparse::arg_parser_exception: there isn't any "
@@ -1379,7 +1436,8 @@ public:
      * @param       key : Key of the argument to get.
      * @return      If function was successful the argument found is returned.
      * @throw       kcs::argparse::arg_parser_exception : If there isn't any argument with the
-     *              specified key an exception is thrown.
+     *              specified key or the argument can't be cast to the specified type an exception
+     *              is thrown.
      */
     const key_value_arg_type& get_key_value_arg(const string_type& key) const
     {
@@ -1387,7 +1445,14 @@ public:
         
         if (it != base_arg_map_.end())
         {
-            return *(dynamic_cast<key_value_arg_type*>(it->second));
+            key_value_arg_type *key_value_arg = dynamic_cast<key_value_arg_type*>(it->second);
+            if (key_value_arg == nullptr)
+            {
+                throw arg_parser_exception("kcs::argparse::arg_parser_exception: the argument c'ant"
+                                                   " be cast to the specified type");
+            }
+    
+            return *key_value_arg;
         }
         
         throw arg_parser_exception("kcs::argparse::arg_parser_exception: there isn't any "
@@ -1399,7 +1464,8 @@ public:
      * @param       key : Key of the argument to get.
      * @return      If function was successful the argument found is returned.
      * @throw       kcs::argparse::arg_parser_exception : If there isn't any argument with the
-     *              specified key an exception is thrown.
+     *              specified key or the argument can't be cast to the specified type an exception
+     *              is thrown.
      */
     const foreign_arg_type& get_foreign_arg(const string_type& key) const
     {
@@ -1407,7 +1473,14 @@ public:
         
         if (it != base_arg_map_.end())
         {
-            return *(dynamic_cast<foreign_arg_type*>(it->second));
+            foreign_arg_type *foreign_arg = dynamic_cast<foreign_arg_type*>(it->second);
+            if (foreign_arg == nullptr)
+            {
+                throw arg_parser_exception("kcs::argparse::arg_parser_exception: the argument c'ant"
+                                                   " be cast to the specified type");
+            }
+    
+            return *foreign_arg;
         }
     
         throw arg_parser_exception("kcs::argparse::arg_parser_exception: there isn't any "
@@ -1635,24 +1708,28 @@ public:
     /**
      * @brief       Get the first argument value with the specified key.
      * @param       key : Key of the argument to get the value.
-     * @param       nothrow_value : This parameter is only used to distinguish it from the first
-     *              version with an overloaded version.
+     * @param       default_value : The value used to construct an argument value if there isn't any
+     *              value.
      * @return      If function was successful the first argument value is returned, otherwise an
-     *              empty argument value is returned.
+     *              argument value constructed with the default value is returned.
+     * @throw       kcs::argparse::arg_parser_exception : If there isn't any argument with the
+     *              specified key an exception is thrown.
      */
+    template<typename TpString_>
     const arg_value_type& get_front_arg_value(
             const string_type& key,
-            const std::nothrow_t& nothrow_value
+            TpString_&& default_value
     ) const
     {
         value_arg_type *value_arg = get_value_arg_reference(key);
         
         if (value_arg == nullptr)
         {
-            return value_arg_type::get_arg_value_empty();
+            throw arg_parser_exception("kcs::argparse::arg_parser_exception: there isn't any "
+                                               "argument with the specified key");
         }
         
-        return value_arg->get_front_value(std::nothrow);
+        return value_arg->get_front_value(std::forward<TpString_>(default_value));
     }
     
     /**
@@ -1685,25 +1762,30 @@ public:
      * @brief       Get the 'n' argument value with the specified key.
      * @param       key : Key of the argument to get the value.
      * @param       index : Position of the element.
-     * @param       nothrow_value : This parameter is only used to distinguish it from the first
-     *              version with an overloaded version.
-     * @return      If function was successful the specified argument value is returned, if not an
-     *              empty argument value is returned.
+     * @param       default_value : The value used to construct an argument value if there isn't any
+     *              value.
+     * @return      If function was successful the argument value in the specified position is
+     *              returned, otherwise an argument value constructed with the default value is
+     *              returned.
+     * @throw       kcs::argparse::arg_parser_exception : If there isn't any argument with the
+     *              specified key an exception is thrown.
      */
+    template<typename TpString_>
     const arg_value_type& get_arg_value_at(
             const string_type& key,
             std::size_t index,
-            const std::nothrow_t& nothrow_value
+            TpString_&& default_value
     ) const
     {
         value_arg_type *value_arg = get_value_arg_reference(key);
         
         if (value_arg == nullptr)
         {
-            return value_arg_type::get_arg_value_empty();
+            throw arg_parser_exception("kcs::argparse::arg_parser_exception: there isn't any "
+                                               "argument with the specified key");
         }
         
-        return value_arg->get_value_at(index, std::nothrow);
+        return value_arg->get_value_at(index, std::forward<TpString_>(default_value));
     }
     
     /**
@@ -1729,24 +1811,57 @@ public:
     /**
      * @brief       Get all the argument values with the specified key.
      * @param       key : Key of the argument to get the values.
-     * @param       nothrow_value : This parameter is only used to distinguish it from the first
-     *              version with an overloaded version.
-     * @return      If function was successful the specified argument values are returned, if not an
-     *              empty argument value collection is returned.
+     * @return      All arguments values found.
+     * @throw       kcs::argparse::arg_parser_exception : If there isn't any argument with the
+     *              specified key or the argument doesn't has any value an exception is thrown.
+     * @throw       kcs::type_casting::bad_type_cast : If no conversion could be performed, an
+     *              exception is thrown.
      */
-    const vector_type<arg_value_type>& get_arg_values(
-            const string_type& key,
-            const std::nothrow_t& nothrow_value
-    ) const
+    template<typename T>
+    const vector_type<T> get_arg_values_as(const string_type& key) const
     {
-        value_arg_type *value_arg = get_key_value_arg_reference(key);
+        value_arg_type *value_arg = get_value_arg_reference(key);
         
         if (value_arg == nullptr)
         {
-            return value_arg_type::get_arg_values_empty();
+            throw arg_parser_exception("kcs::argparse::arg_parser_exception: there isn't "
+                                               "any argument with the specified key");
         }
         
-        return value_arg->get_values();
+        vector_type<T> result;
+        for (auto& x : value_arg->get_values())
+        {
+            result.push_back(x.template as<T>());
+        }
+        
+        return result;
+    }
+    
+    /**
+     * @brief       Get all the argument values with the specified key.
+     * @param       key : Key of the argument to get the values.
+     * @return      All arguments values found.
+     * @throw       kcs::argparse::arg_parser_exception : If there isn't any argument with the
+     *              specified key or the argument doesn't has any value an exception is thrown.
+     */
+    template<typename T, typename TpString_>
+    const vector_type<T> get_arg_values_as(const string_type& key, TpString_&& default_value) const
+    {
+        value_arg_type *value_arg = get_value_arg_reference(key);
+        
+        if (value_arg == nullptr)
+        {
+            throw arg_parser_exception("kcs::argparse::arg_parser_exception: there isn't "
+                                               "any argument with the specified key");
+        }
+        
+        vector_type<T> result;
+        for (auto& x : value_arg->get_values())
+        {
+            result.push_back(x.template as<T>(std::forward<TpString_>(default_value)));
+        }
+        
+        return result;
     }
     
     /**
@@ -1856,13 +1971,15 @@ public:
             if (dynamic_cast<help_text_type*>(x) != nullptr ||
                 !flags_.flag_is_raised(arg_parser_flags::PRINT_ARGS_ID_ON_PRINT_HELP))
             {
-                x->print_help_text(max_description_line_length_, newline_indentation_, 0);
+                x->print_help_text(max_description_line_length_,
+                                   description_newline_indentation_,
+                                   0);
             }
             else if ((base_arg = dynamic_cast<base_arg_type*>(x)) != nullptr)
             {
-                base_arg->print_help_text(max_description_line_length_,
-                                          newline_indentation_,
-                                          key_help_description_indentation_,
+                base_arg->print_help_text(arg_description_indentation_,
+                                          max_description_line_length_,
+                                          description_newline_indentation_,
                                           short_id_length,
                                           long_id_length);
             }
@@ -1918,7 +2035,23 @@ public:
             {
                 for (auto& x : unrecognized_args_)
                 {
-                    os << program_name_ << ": Unrecognized option '" << x << "'" << std::endl;
+                    os << program_name_ << ": ";
+                    if (!error_id_.empty())
+                    {
+                        if (flags_.flag_is_raised(arg_parser_flags::USE_COLORS_ON_PRINT_ERRORS))
+                        {
+                            kcs::system::set_ostream_text_attribute(
+                                    os, kcs::system::text_attribute::LIGHT_RED);
+                            os << error_id_ << ": ";
+                            kcs::system::set_ostream_text_attribute(
+                                    os, kcs::system::text_attribute::DEFAULT);
+                        }
+                        else
+                        {
+                            os << error_id_ << ": ";
+                        }
+                    }
+                    os << "Unrecognized option '" << x << "'" << std::endl;
                 }
             }
             
@@ -2317,7 +2450,7 @@ private:
     }
     
     /**
-     * @brief       Get a arg keys list from a strings list.
+     * @brief       Get an arg keys list from a strings list.
      * @param       keys : The list of string keys.
      * @return      A list of arg keys.
      */
@@ -2493,8 +2626,8 @@ private:
         else if ((heltp_text = dynamic_cast<help_text_type*>(arg)) != nullptr)
         {
             allocator_type<help_text_type> help_text_type_alloc;
-            help_text_type_alloc.destroy((help_text_type*)arg);
-            help_text_type_alloc.deallocate((help_text_type*)arg, 1);
+            help_text_type_alloc.destroy(heltp_text);
+            help_text_type_alloc.deallocate(heltp_text, 1);
         }
         
         arg = nullptr;
@@ -2520,14 +2653,14 @@ private:
     /** Collection that contains the long prefixes arguments. The default long prefix is '--' */
     unordered_set_type<string_type> long_prefixes_;
     
-    /** Indentation used to print keys arguments help description. */
-    std::size_t key_help_description_indentation_;
+    /** Indentation used to print arguments help description. */
+    std::size_t arg_description_indentation_;
     
-    /** The maximum arguments description length that will be printed in a single line. */
+    /** The maximum description length that will be printed in a single line. */
     std::size_t max_description_line_length_;
     
-    /** The indentation used when a newline is found. */
-    std::size_t newline_indentation_;
+    /** The indentation used when a newline is found in a description. */
+    std::size_t description_newline_indentation_;
     
     /** Collection that contains all the arguments. */
     vector_type<ihelp_text_type*> ihelp_text_list_;
@@ -2543,6 +2676,9 @@ private:
     
     /** Collection used to allow O(1) access on argument keys. */
     unordered_map_type<string_type, base_arg_type*> base_arg_map_;
+    
+    /** Error id that will be used for global errors. */
+    string_type error_id_;
     
     /** Contains the unrecognized argument if an error happen. */
     vector_type<string_type> unrecognized_args_;

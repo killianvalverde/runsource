@@ -37,7 +37,7 @@ namespace argparse {
 enum class arg_value_error_flags : std::uint8_t
 {
     /** Null flag. */
-    NULL_ARG_VALUE_ERROR_FLAGS = 0x0,
+    NIL = 0x0,
     
     /** The value specified is not correct. */
     WRONG_VALUE_ERROR = 0x1,
@@ -46,7 +46,7 @@ enum class arg_value_error_flags : std::uint8_t
     REGEX_TO_MATCH_ERROR = 0x2,
     
     /** All the argument value error flags. */
-    FULL_ARG_VALUE_ERROR_FLAGS = 0x3
+    ALL = 0x3
 };
 
 

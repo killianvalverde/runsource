@@ -1,3 +1,4 @@
+set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib")
@@ -17,13 +18,11 @@ set(SOURCE_FILES
         kcs/argparse/basic_key_arg.hpp
         kcs/argparse/basic_key_value_arg.hpp
         kcs/argparse/basic_version_arg.hpp
-        kcs/filesystem/filesystem.hpp
         kcs/lowlevel/flags_container.hpp
         kcs/lowlevel/enum_bitwise_operators.hpp
         kcs/stringutils/stringutils.hpp
         kcs/type_traits/type_traits.hpp
         kcs/argparse.hpp
-        kcs/filesystem.hpp
         kcs/kcs.hpp
         kcs/lowlevel.hpp
         kcs/stringutils.hpp
@@ -52,13 +51,15 @@ set(SOURCE_FILES
         kcs/type_casting/c_string_to_floating_point.hpp
         kcs/type_casting/c_string_to_path.hpp
         kcs/iostream/stdio.cpp
-        kcs/filesystem/filesystem.cpp 
         kcs/argparse/ibasic_help_text.hpp 
         kcs/iostream/basic_ostream.hpp 
         kcs/iostream/basic_ios_redirect.hpp 
         kcs/system/input_output.hpp 
         kcs/system/input_output.cpp
-        kcs/system/filesystem.hpp)
+        kcs/system/filesystem.cpp
+        kcs/system/system_exception.hpp
+        kcs/system/filesystem.hpp
+        kcs/system/process.cpp)
 
 add_library(kcs STATIC ${SOURCE_FILES})
 

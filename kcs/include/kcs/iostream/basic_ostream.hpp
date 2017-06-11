@@ -16,7 +16,7 @@
 
 /**
  * @file        kcs/iostream/basic_ostream.hpp
- * @brief       basic_ostream related fonctions header.
+ * @brief       basic_ostream related functions header.
  * @author      Killian
  * @date        2016/08/24 - 09:50
  */

@@ -18,7 +18,7 @@
 
 #include "kcs/argparse.hpp"
 #include "kcs/system.hpp"
-#include "program.hpp"
+#include "runsource_entry.hpp"
 
 namespace stdfs = std::experimental::filesystem;
 namespace kap = kcs::argparse;
@@ -57,9 +57,9 @@ int main(int argc, char *argv[])
     ap.add_key_arg({"--c++14"}, "Use C++14 standard when C++ language is selected.");
     ap.add_key_arg({"--c++17"}, "Use C++17 standard when C++ language is selected.");
     ap.add_help_arg({"--help"}, "Display this help and exit.");
-    ap.add_gplv3_version_arg({"--version"}, "Output vesion information and exit", "1.0", "2017",
+    ap.add_gplv3_version_arg({"--version"}, "Output version information and exit", "1.0", "2017",
                              "Killian");
-    ap.add_foreign_arg("FILE", "File", "The source file path.", {kap::avt_t::R_FILE},
+    ap.add_foreign_arg("FILE", "File", "", {kap::avt_t::R_FILE},
                        1u, ~0u);
     
     ap.parse_args((unsigned int)argc, argv);
@@ -128,35 +128,17 @@ int main(int argc, char *argv[])
         tool_chain = rs::tool_chain::GCC;
     }
 
-    std::vector<std::string> compiler_args;
-    for (auto& x : ap.get_arg_values("--compiler-args", std::nothrow))
-    {
-        compiler_args.push_back(x.get_value());
-    }
-    
-    std::vector<std::string> program_args;
-    for (auto& x : ap.get_arg_values("--program-args", std::nothrow))
-    {
-        program_args.push_back(x.get_value());
-    }
-
-    std::vector<stdfs::path> files;
-    for (auto& x : ap.get_arg_values("FILE"))
-    {
-        files.push_back(x.type_cast<stdfs::path>());
-    }
-
-    runsource::program prog(
+    runsource::runsource_entry rns(
             !ap.arg_found("--build"),
             language,
             c_standard,
             cpp_standard,
             tool_chain,
-            std::move(compiler_args),
-            std::move(program_args),
-            std::move(files)
+            std::move(ap.get_arg_values_as<std::string>("--compiler-args")),
+            std::move(ap.get_arg_values_as<std::string>("--program-args")),
+            std::move(ap.get_arg_values_as<stdfs::path>("FILE"))
     );
-    result = prog.exec();
+    result = rns.exec();
     
     if (ap.arg_found("--pause"))
     {

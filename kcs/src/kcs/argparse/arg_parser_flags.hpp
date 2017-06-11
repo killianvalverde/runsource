@@ -37,7 +37,7 @@ namespace argparse {
 enum class arg_parser_flags : std::uint16_t
 {
     /** Null flag. */
-    NULL_ARG_PARSER_FLAGS = 0x0,
+    NIL = 0x0,
     
     /** Print the help information when a help argument is found. */
     PRINT_HELP = 0x1,
@@ -65,20 +65,24 @@ enum class arg_parser_flags : std::uint16_t
     /** Use colors to print arguments errors. */
     USE_COLORS_ON_PRINT_ERRORS = 0x80,
     
+    /** A default error id will be used to print global arg parser errors if the error id is
+     * empty. */
+    USE_DEFAULT_ERROR_ID_IF_ERROR_ID_EMPTY = 0x100,
+    
     /** The foreign arguments values cannot be added if the value contains one of the prefixes. */
-    FOREIGN_VALUE_ARG_CANNOT_BE_ADDED_WITH_PREFIX = 0x100,
+    FOREIGN_VALUE_ARG_CANNOT_BE_ADDED_WITH_PREFIX = 0x200,
     
     /** Exit the program when the help information is printed. */
-    EXIT_ON_PRINT_HELP = 0x200,
+    EXIT_ON_PRINT_HELP = 0x400,
     
     /** Exit the program when the version information is printed. */
-    EXIT_ON_PRINT_VERSION = 0x400,
+    EXIT_ON_PRINT_VERSION = 0x800,
     
     /** Exit the program when the args errors are printed. */
-    EXIT_ON_PRINT_ARGS_ERRORS = 0x800,
+    EXIT_ON_PRINT_ARGS_ERRORS = 0x1000,
     
     /** All argument parser flags. */
-    FULL_ARG_PARSER_FLAGS = 0xFFFF,
+    ALL = 0x1FFF,
     
     /** The default flags used by the argument parser. */
     DEFAULT_ARG_PARSER_FLAGS = (
@@ -89,6 +93,7 @@ enum class arg_parser_flags : std::uint16_t
             PRINT_USAGE_ON_PRINT_HELP |
             PRINT_ARGS_ID_ON_PRINT_HELP |
             USE_COLORS_ON_PRINT_ERRORS |
+            USE_DEFAULT_ERROR_ID_IF_ERROR_ID_EMPTY |
             FOREIGN_VALUE_ARG_CANNOT_BE_ADDED_WITH_PREFIX |
             EXIT_ON_PRINT_HELP |
             EXIT_ON_PRINT_VERSION |

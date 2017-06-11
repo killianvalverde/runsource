@@ -27,7 +27,7 @@
 #elif defined(_WIN32)
 #include <windows.h>
 #endif
-#include <cstdio>
+#include <iostream>
 
 #include "input_output.hpp"
 
@@ -42,7 +42,7 @@ void pause(const char *message)
     struct ::termios oldt, newt;
     if (message != nullptr)
     {
-        ::printf("%s\n", message);
+        std::cout << message << std::endl;
     }
     ::tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
@@ -51,7 +51,7 @@ void pause(const char *message)
     ::getchar();
     ::tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 #else
-#error "system not supported"
+    throw system_exception("kcs::system::system_exception: system not supported");
 #endif
 }
 
@@ -122,7 +122,7 @@ int set_stream_text_attribute(::FILE *stream, text_attribute attribute)
     }
     return 0;
 #else
-#error "system not supported"
+    throw system_exception("kcs::system::system_exception: system not supported");
 #endif
 }
 
@@ -187,9 +187,14 @@ int set_ostream_text_attribute(std::ostream& os, text_attribute attribute)
             break;
     }
     
+    if (!os.good())
+    {
+        return -1;
+    }
+    
     return 0;
 #else
-#error "system not supported"
+    throw system_exception("kcs::system::system_exception: system not supported");
 #endif
 }
 

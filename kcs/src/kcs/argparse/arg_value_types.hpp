@@ -39,7 +39,7 @@ namespace argparse {
 enum class arg_value_types : std::uint32_t
 {
     /** Null flag. */
-    NULL_ARG_VALUE_TYPES = 0x0,
+    NIL = 0x0,
     
     /** Argument value bool type. */
     BOOL = 0x1,
@@ -110,11 +110,11 @@ enum class arg_value_types : std::uint32_t
     /** Argument value writable file type. */
     W_FILE = 0x40'0000,
     
-    /** Argument value writable or creatable file type. */
-    WC_FILE = 0x80'0000,
-    
     /** Argument value executable file type. */
-    X_FILE = 0x100'0000,
+    X_FILE = 0x80'0000,
+    
+    /** Argument value creatable file type. */
+    C_FILE = 0x100'0000,
     
     /** Argument value readable directory type. */
     R_DIR = 0x200'0000,
@@ -126,7 +126,7 @@ enum class arg_value_types : std::uint32_t
     X_DIR = 0x800'0000,
     
     /** All argument value types. */
-    FULL_ARG_VALUE_TYPES = 0xFFF'FFFF
+    ALL = 0xFFF'FFFF
 };
 
 

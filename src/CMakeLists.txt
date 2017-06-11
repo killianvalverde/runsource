@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
-project(runsource)
-
 set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib")
@@ -12,8 +8,8 @@ include_directories(${CMAKE_SOURCE_DIR}/kcs/include)
 
 set(SOURCE_FILES
         main.cpp
-        program.cpp
-        program.hpp
+        runsource_entry.cpp
+        runsource_entry.hpp
         language.hpp
         tool_chain.hpp cpp_standard.hpp c_standard.hpp)
 

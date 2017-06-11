@@ -38,10 +38,10 @@ namespace stdfs = std::experimental::filesystem;
 namespace rs = runsource;
 
 
-class program
+class runsource_entry
 {
 public:
-    program(
+    runsource_entry(
             bool execute,
             rs::language language,
             rs::c_standard c_standard,

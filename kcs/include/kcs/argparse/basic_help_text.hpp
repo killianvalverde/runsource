@@ -109,13 +109,14 @@ public:
     
     /**
      * @brief       Print the argument information for help menu.
-     * @param       max_description_line_length : The maximum arguments description length that will
-     *              be printed in a single line.
-     * @param       newline_indentation : The indentation used when a newline is found.
+     * @param       max_line_length : The maximum description length that will be printed in a
+     *              single line.
+     * @param       newline_indentation : The indentation used when a newline is found in a
+     *              description.
      * @param       current_line_length : The length of the current line.
      */
     void print_help_text(
-            std::size_t max_description_line_length,
+            std::size_t max_line_length,
             std::size_t newline_indentation,
             std::size_t current_line_length
     ) const override
@@ -151,7 +152,7 @@ public:
                 }
             
                 kcs::lowlevel::try_addm(&length_to_next, current_line_length);
-                if (length_to_next > max_description_line_length)
+                if (length_to_next > max_line_length)
                 {
                     current_line_length = newline_indentation;
                     os << std::endl;

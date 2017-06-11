@@ -35,24 +35,26 @@ TEST(arg_parser_test, perfect_forwarding_constructor_test)
 {
     kap::arg_parser ap1();
     kap::arg_parser ap2("kcs");
-    kap::arg_parser ap3("kcs", {"-"}, {"--"}, 2u, 80u, 2u, ~0u,
-                                 kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);;
+    kap::arg_parser ap3("kcs", {"-"}, {"--"}, 2u, 80u, 2u, "error", ~0u,
+                        kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);;
     
     std::string program_name = "kcs";
     std::unordered_set<std::string> short_prefixes = {"-"};
     std::unordered_set<std::string> long_prefixes = {"--"};
-    std::size_t key_help_description_indentation = 2u;
+    std::size_t arg_description_indentation = 2u;
     std::size_t max_description_line_length = 80u;
-    std::size_t newline_indentation = 2u;
+    std::size_t description_newline_indentation = 2u;
+    std::string error_id = "error";
     std::size_t max_unrecognized_args = ~2u;
     kap::apf_t flags = kap::apf_t::DEFAULT_ARG_PARSER_FLAGS;
     
     kap::arg_parser ap4(program_name,
                         short_prefixes,
                         long_prefixes,
-                        key_help_description_indentation,
+                        arg_description_indentation,
                         max_description_line_length,
-                        newline_indentation,
+                        description_newline_indentation,
+                        error_id,
                         max_unrecognized_args,
                         flags);
     
@@ -63,35 +65,38 @@ TEST(arg_parser_test, perfect_forwarding_constructor_test)
     kap::arg_parser ap5(std::move(program_name),
                         std::move(short_prefixes),
                         std::move(long_prefixes),
-                        std::move(key_help_description_indentation),
+                        std::move(arg_description_indentation),
                         std::move(max_description_line_length),
-                        std::move(newline_indentation),
+                        std::move(description_newline_indentation),
+                        std::move(error_id),
                         std::move(max_unrecognized_args),
                         std::move(flags));
     
     EXPECT_TRUE(program_name.empty());
     EXPECT_TRUE(short_prefixes.empty());
     EXPECT_TRUE(long_prefixes.empty());
+    EXPECT_TRUE(error_id.empty());
 }
 
 
 TEST(arg_parser_test, parameters_constructor_test)
 {
     kap::arg_parser ap(kap::arg_parser::constructor_params::get()
-                                       .flags(kap::apf_t::DEFAULT_ARG_PARSER_FLAGS)
-                                       .max_unrecognized_args(~0u)
-                                       .newline_indentation(2)
-                                       .max_description_line_length(80)
-                                       .key_help_description_indentation(2)
-                                       .long_prefixes({"--"})
-                                       .short_prefixes({"-"})
-                                       .program_name("kcs"));
+                               .flags(kap::apf_t::DEFAULT_ARG_PARSER_FLAGS)
+                               .error_id("error")
+                               .max_unrecognized_args(~0u)
+                               .description_newline_indentation(2)
+                               .max_description_line_length(80)
+                               .arg_description_indentation(2)
+                               .long_prefixes({"--"})
+                               .short_prefixes({"-"})
+                               .program_name("kcs"));
 }
 
 
 TEST(arg_parser_test, copy_constructor_test)
 {
-    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 2u, 80u, 2u, ~0u,
+    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 2u, 80u, 2u, "error", ~0u,
                         kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
     kap::arg_parser ap2(ap1);
 }
@@ -99,7 +104,7 @@ TEST(arg_parser_test, copy_constructor_test)
 
 TEST(arg_parser_test, move_constructor_test)
 {
-    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 4u, 100u, 4u, ~2u,
+    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 4u, 100u, 4u, "error", ~2u,
                         kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
     kap::arg_parser ap2(std::move(ap1));
 }
@@ -108,7 +113,7 @@ TEST(arg_parser_test, move_constructor_test)
 TEST(arg_parser_test, copy_assignment_operator_test)
 {
     kap::arg_parser ap1;
-    kap::arg_parser ap2("kcs", {"-"}, {"/"}, 2u, 80u, 2u, ~0u,
+    kap::arg_parser ap2("kcs", {"-"}, {"/"}, 2u, 80u, 2u, "error", ~0u,
                         kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
     ap1 = ap2;
 }
@@ -116,9 +121,10 @@ TEST(arg_parser_test, copy_assignment_operator_test)
 
 TEST(arg_parser_test, move_assignment_operator_test)
 {
-    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 2u, 80u, 2u, ~0u,
+    kap::arg_parser ap1("kcs", {"-"}, {"--"}, 2u, 80u, 2u, "error", ~0u,
                         kap::apf_t::DEFAULT_ARG_PARSER_FLAGS);
-    kap::arg_parser ap2("kcs_", {"/"}, {"//"}, 4u, 100u, 4u, 1u, kap::apf_t::NULL_ARG_PARSER_FLAGS);
+    kap::arg_parser ap2("kcs_", {"/"}, {"//"}, 4u, 100u, 4u, "error_", 1u,
+                        kap::apf_t::NIL);
     ap1 = std::move(ap2);
 }
 
@@ -449,9 +455,9 @@ TEST(arg_parser_test, parse_args_test_2)
     ap.add_key_value_arg({"--mintes", "-m"}, "Set minutes", {kap::avt_t::UINT64});
     ap.add_key_value_arg({"--hours", "-h"}, "Set hours", {kap::avt_t::UINT64});
     ap.parse_args(argv.size(), argv);
-    EXPECT_TRUE(ap.get_front_arg_value("-s").get_value() == "10");
-    EXPECT_TRUE(ap.get_front_arg_value("-m").get_value() == "20");
-    EXPECT_TRUE(ap.get_front_arg_value("-h").get_value() == "30");
+    EXPECT_TRUE(ap.get_front_arg_value("-s").as_string() == "10");
+    EXPECT_TRUE(ap.get_front_arg_value("-m").as_string() == "20");
+    EXPECT_TRUE(ap.get_front_arg_value("-h").as_string() == "30");
 }
 
 
@@ -469,12 +475,12 @@ TEST(arg_parser_test, parse_args_test_3)
     ap.add_key_value_arg({"--mintes", "-m"}, "Set minutes", {kap::avt_t::UINT64}, 1, 2);
     ap.add_key_value_arg({"--hours", "-h"}, "Set hours", {kap::avt_t::UINT64}, 1, 3);
     ap.parse_args(argv.size(), argv);
-    EXPECT_TRUE(ap.get_front_arg_value("-s").get_value() == "10");
-    EXPECT_TRUE(ap.get_front_arg_value("-m").get_value() == "20");
-    EXPECT_TRUE(ap.get_front_arg_value("-h").get_value() == "30");
-    EXPECT_TRUE(ap.get_arg_value_at("-m", 1).get_value() == "200");
-    EXPECT_TRUE(ap.get_arg_value_at("-h", 1).get_value() == "300");
-    EXPECT_TRUE(ap.get_arg_value_at("-h", 2).get_value() == "3000");
+    EXPECT_TRUE(ap.get_front_arg_value("-s").as_string() == "10");
+    EXPECT_TRUE(ap.get_front_arg_value("-m").as_string() == "20");
+    EXPECT_TRUE(ap.get_front_arg_value("-h").as_string() == "30");
+    EXPECT_TRUE(ap.get_arg_value_at("-m", 1).as_string() == "200");
+    EXPECT_TRUE(ap.get_arg_value_at("-h", 1).as_string() == "300");
+    EXPECT_TRUE(ap.get_arg_value_at("-h", 2).as_string() == "3000");
 }
 
 
@@ -487,9 +493,9 @@ TEST(arg_parser_test, parse_args_test_4)
     ap.add_key_value_arg({"--mintes", "-m"}, "Set minutes", {kap::avt_t::UINT64});
     ap.add_key_value_arg({"--hours", "-h"}, "Set hours", {kap::avt_t::UINT64});
     ap.parse_args(argv.size(), argv);
-    EXPECT_TRUE(ap.get_front_arg_value("-s").get_value() == "10");
-    EXPECT_TRUE(ap.get_front_arg_value("-m").get_value() == "20");
-    EXPECT_TRUE(ap.get_front_arg_value("-h").get_value() == "30");
+    EXPECT_TRUE(ap.get_front_arg_value("-s").as_string() == "10");
+    EXPECT_TRUE(ap.get_front_arg_value("-m").as_string() == "20");
+    EXPECT_TRUE(ap.get_front_arg_value("-h").as_string() == "30");
 }
 
 
@@ -506,7 +512,7 @@ TEST(arg_parser_test, parse_args_test_5)
     ap.parse_args(argv.size(), argv);
     EXPECT_TRUE(ap.arg_found("-m"));
     EXPECT_TRUE(ap.there_are_errors());
-    EXPECT_TRUE(ap.get_front_arg_value("-h").get_value() == "30");
+    EXPECT_TRUE(ap.get_front_arg_value("-h").as_string() == "30");
 }
 
 
@@ -524,9 +530,9 @@ TEST(arg_parser_test, parse_args_test_6)
     ap.add_key_value_arg({"--mintes", "-m"}, "Set minutes", {kap::avt_t::UINT64});
     ap.add_key_value_arg({"--hours", "-h"}, "Set hours", {kap::avt_t::UINT64});
     ap.parse_args(argv.size(), argv);
-    EXPECT_TRUE(ap.get_front_arg_value("-s").get_value() == "10");
-    EXPECT_TRUE(ap.get_front_arg_value("-m").get_value() == "20");
-    EXPECT_TRUE(ap.get_front_arg_value("-h").get_value() == "30");
+    EXPECT_TRUE(ap.get_front_arg_value("-s").as_string() == "10");
+    EXPECT_TRUE(ap.get_front_arg_value("-m").as_string() == "20");
+    EXPECT_TRUE(ap.get_front_arg_value("-h").as_string() == "30");
 }
 
 
@@ -542,7 +548,7 @@ TEST(arg_parser_test, parse_args_test_7)
     ap.add_key_value_arg({"--seconds", "-s"}, "Set seconds", {kap::avt_t::UINT64});
     ap.add_foreign_arg("FILE", "File", "The file path");
     ap.parse_args(argv.size(), argv);
-    EXPECT_TRUE(ap.get_front_arg_value("File").get_value() == "/home/user/Desktop/file.cpp");
+    EXPECT_TRUE(ap.get_front_arg_value("File").as_string() == "/home/user/Desktop/file.cpp");
 }
 
 
@@ -651,9 +657,9 @@ TEST(arg_parser_test, get_front_arg_value_2_test)
     ap.add_key_value_arg({"-s"}, "Seconds to set", {kap::avt_t::INT32});
     ap.add_key_value_arg({"-m"}, "Minutes to set", {kap::avt_t::INT32});
     ap.parse_args(argv.size(), argv);
-    EXPECT_TRUE(ap.get_front_arg_value("-h", std::nothrow).there_are_errors());
-    EXPECT_TRUE(ap.get_front_arg_value("-m", std::nothrow).there_are_errors());
-    EXPECT_TRUE(!ap.get_front_arg_value("-s", std::nothrow).there_are_errors());
+    EXPECT_THROW(ap.get_front_arg_value("-h", "30"), kap::arg_parser_exception);
+    EXPECT_TRUE(ap.get_front_arg_value("-m", "20").as<int>() == 20);
+    EXPECT_TRUE(ap.get_front_arg_value("-s", "10").as<int>() == 30);
 }
 
 
@@ -679,13 +685,13 @@ TEST(arg_parser_test, get_arg_value_at_2_test)
     ap.add_key_value_arg({"-s"}, "Seconds to set", {kap::avt_t::INT32});
     ap.add_key_value_arg({"-m"}, "Minutes to set", {kap::avt_t::INT32});
     ap.parse_args(argv.size(), argv);
-    EXPECT_TRUE(ap.get_arg_value_at("-h", 0, std::nothrow).there_are_errors());
-    EXPECT_TRUE(ap.get_arg_value_at("-m", 1, std::nothrow).there_are_errors());
-    EXPECT_TRUE(!ap.get_arg_value_at("-s", 0, std::nothrow).there_are_errors());
+    EXPECT_THROW(ap.get_arg_value_at("-h", 0, "30"), kap::arg_parser_exception);
+    EXPECT_TRUE(ap.get_arg_value_at("-m", 1, "20").as<int>() == 20);
+    EXPECT_TRUE(ap.get_arg_value_at("-s", 0, "10").as<int>() == 30);
 }
 
 
-TEST(arg_parser_test, get_arg_values_1_test)
+TEST(arg_parser_test, get_arg_values_test)
 {
     std::vector<const char*> argv = {"kcs", "-s", "30"};
 
@@ -695,21 +701,7 @@ TEST(arg_parser_test, get_arg_values_1_test)
     ap.parse_args(argv.size(), argv);
     EXPECT_THROW(ap.get_arg_values("-h"), kap::arg_parser_exception);
     EXPECT_TRUE(ap.get_arg_values("-s").size() == 1);
-    EXPECT_TRUE(ap.get_arg_values("-s").front().get_value() == "30");
-}
-
-
-TEST(arg_parser_test, get_arg_values_2_test)
-{
-    std::vector<const char*> argv = {"kcs", "-s", "30"};
-
-    kap::arg_parser ap;
-    ap.add_key_value_arg({"-s"}, "Seconds to set", {kap::avt_t::INT32});
-    ap.add_key_value_arg({"-m"}, "Minutes to set", {kap::avt_t::INT32});
-    ap.parse_args(argv.size(), argv);
-    EXPECT_TRUE(ap.get_arg_values("-h", std::nothrow).empty());
-    EXPECT_TRUE(ap.get_arg_values("-s", std::nothrow).size() == 1);
-    EXPECT_TRUE(ap.get_arg_values("-s", std::nothrow).front().get_value() == "30");
+    EXPECT_TRUE(ap.get_arg_values("-s").front().as_string() == "30");
 }
 
 

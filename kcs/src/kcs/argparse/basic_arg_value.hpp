@@ -30,7 +30,7 @@
 #include <string>
 #include <system_error>
 
-#include "../filesystem/filesystem.hpp"
+#include "../system/filesystem.hpp"
 #include "../iostream/basic_ostream.hpp"
 #include "../lowlevel/flags_container.hpp"
 #include "../stringutils/stringutils.hpp"
@@ -46,6 +46,10 @@
 
 namespace kcs {
 namespace argparse {
+
+
+namespace stdfs = std::experimental::filesystem;
+namespace ksys = kcs::system;
 
 
 template<typename TpChar, typename TpCharTraits, typename TpAlloc>
@@ -84,6 +88,20 @@ public:
     using string_type = std::basic_string<TpChar, TpCharTraits, allocator_type<char_type>>;
     
     /**
+     * @brief       Default constructor.
+     */
+    basic_arg_value()
+            : value_()
+            , type_(arg_value_types::NIL)
+            , regex_to_match_()
+            , error_flags_(arg_value_error_flags::NIL)
+            , invalid_path_(false)
+            , error_message_()
+            , composite_flags_(arg_flags::NIL)
+    {
+    }
+    
+    /**
      * @brief       Perfect forwarding constructor.
      * @param       value : Argument value in string format.
      * @param       type : Type of the value.
@@ -102,18 +120,16 @@ public:
             TpString1_&& value,
             arg_value_types type = arg_value_types::STRING,
             TpString2_&& regex_to_match = string_type(),
-            arg_flags composite_flags = arg_flags::NULL_ARG_FLAGS
+            arg_flags composite_flags = arg_flags::NIL
     )
             : value_(std::forward<TpString1_>(value))
             , type_(type)
             , regex_to_match_(std::forward<TpString2_>(regex_to_match))
-            , error_flags_(arg_value_error_flags::NULL_ARG_VALUE_ERROR_FLAGS)
+            , error_flags_(arg_value_error_flags::NIL)
             , invalid_path_(false)
             , error_message_()
             , composite_flags_(composite_flags)
     {
-        namespace stdfs = std::experimental::filesystem;
-    
         if ((type_.flag_is_raised(arg_value_types::BOOL) &&
              !is_value_valid<bool>()) ||
             (type_.flag_is_raised(arg_value_types::DOUBLE) &&
@@ -211,15 +227,6 @@ public:
     basic_arg_value& operator =(basic_arg_value&& rhs) noexcept = default;
     
     /**
-     * @brief       Get the raw object string.
-     * @return      The raw object string.
-     */
-    inline const string_type& get_value() const noexcept
-    {
-        return value_;
-    }
-    
-    /**
      * @brief       Allows knowing wether the value can be coverted to the specified type.
      * @return      If function was successful true is returned, otherwise false is returned.
      */
@@ -233,12 +240,12 @@ public:
         if (std::is_arithmetic<T>::value)
         {
             if (composite_flags_.flag_is_raised(arg_flags::ALLOW_MIN_CONSTANT) &&
-                    kcs::stringutils::strcmp(value_, "min") == 0)
+                kcs::stringutils::strcmp(value_, "min") == 0)
             {
                 return true;
             }
             else if (composite_flags_.flag_is_raised(arg_flags::ALLOW_MAX_CONSTANT) &&
-                    kcs::stringutils::strcmp(value_, "max") == 0)
+                     kcs::stringutils::strcmp(value_, "max") == 0)
             {
                 return true;
             }
@@ -259,31 +266,37 @@ public:
     >
     check_type() const noexcept
     {
-        namespace stdfs = std::experimental::filesystem;
-    
         stdfs::path path(value_);
         bool success = true;
-        std::error_condition error_condition;
-    
+        
         if ((type_.flag_is_raised(arg_value_types::R_FILE) &&
-             !kcs::filesystem::can_current_process_read_file(path, error_condition)) ||
+             !ksys::access(path, ksys::ft_t::REGULAR_FILE, ksys::am_t::READ)) ||
             (type_.flag_is_raised(arg_value_types::W_FILE) &&
-             !kcs::filesystem::can_current_process_write_file(path, error_condition)) ||
-            (type_.flag_is_raised(arg_value_types::WC_FILE) &&
-             !kcs::filesystem::can_current_process_write_or_create_file(path, error_condition)) ||
+             !ksys::access(path, ksys::ft_t::REGULAR_FILE, ksys::am_t::WRITE)) ||
             (type_.flag_is_raised(arg_value_types::X_FILE) &&
-             !kcs::filesystem::can_current_process_execute_file(path, error_condition)) ||
+             !ksys::access(path, ksys::ft_t::REGULAR_FILE, ksys::am_t::EXECUTE)) ||
+            (type_.flag_is_raised(arg_value_types::C_FILE) &&
+             !ksys::access(path, ksys::ft_t::REGULAR_FILE, ksys::am_t::CREATE)) ||
             (type_.flag_is_raised(arg_value_types::R_DIR) &&
-             !kcs::filesystem::can_current_process_read_dir(path, error_condition)) ||
+             !ksys::access(path, ksys::ft_t::DIRECTORY, ksys::am_t::READ)) ||
             (type_.flag_is_raised(arg_value_types::W_DIR) &&
-             !kcs::filesystem::can_current_process_write_dir(path, error_condition)) ||
+             !ksys::access(path, ksys::ft_t::DIRECTORY, ksys::am_t::WRITE)) ||
             (type_.flag_is_raised(arg_value_types::X_DIR) &&
-             !kcs::filesystem::can_current_process_execute_dir(path, error_condition)))
+             !ksys::access(path, ksys::ft_t::DIRECTORY, ksys::am_t::EXECUTE)))
         {
             success = false;
         }
-    
+        
         return success;
+    }
+    
+    /**
+     * @brief       Get the raw object string.
+     * @return      The raw object string.
+     */
+    inline const string_type& as_string() const noexcept
+    {
+        return value_;
     }
     
     /**
@@ -297,7 +310,7 @@ public:
             std::is_arithmetic<T>::value,
             T
     >
-    type_cast() const
+    as() const
     {
         if (composite_flags_.flag_is_raised(arg_flags::ALLOW_MIN_CONSTANT) &&
             kcs::stringutils::strcmp(value_, "min") == 0)
@@ -324,24 +337,23 @@ public:
             !std::is_arithmetic<T>::value,
             T
     >
-    type_cast() const
+    as() const
     {
         return kcs::type_casting::type_cast<T>(value_);
     }
     
     /**
      * @brief       Get the value converted to tp.
-     * @param       nothrow_value : This parameter is only used to distinguish it from the first
-     *              version with an overloaded version.
-     * @return      If function was successful the value converted to tp is returned, otherwise
-     *              false is returned.
+     * @param       default_value : The value returned if the conversion fails.
+     * @return      If function was successful the value converted to tp is returned, otherwise the
+     *              default value specified is returned.
      */
     template<typename T>
     std::enable_if_t<
             std::is_arithmetic<T>::value,
             T
     >
-    type_cast(const std::nothrow_t& nothrow_value) const
+    as(T&& default_value) const
     {
         if (composite_flags_.flag_is_raised(arg_flags::ALLOW_MIN_CONSTANT) &&
             kcs::stringutils::strcmp(value_, "min") == 0)
@@ -353,29 +365,24 @@ public:
         {
             return std::numeric_limits<T>::max();
         }
-        
-        T result = T();
-        kcs::type_casting::try_type_cast<T>(value_, result);
-        return result;
+    
+        return kcs::type_casting::type_cast<T>(value_, std::forward<T>(default_value));
     }
     
     /**
      * @brief       Get the value converted to tp.
-     * @param       nothrow_value : This parameter is only used to distinguish it from the first
-     *              version with an overloaded version.
-     * @return      If function was successful the value converted to tp is returned, otherwise
-     *              false is returned.
+     * @param       default_value : The value returned if the conversion fails.
+     * @return      If function was successful the value converted to tp is returned, otherwise the
+     *              default value specified is returned.
      */
     template<typename T>
     std::enable_if_t<
             !std::is_arithmetic<T>::value,
             T
     >
-    type_cast(const std::nothrow_t& nothrow_value) const
+    as(T&& default_value) const
     {
-        T res = T();
-        kcs::type_casting::try_type_cast<T>(value_, res);
-        return res;
+        return kcs::type_casting::type_cast<T>(value_, std::forward<T>(default_value));
     }
     
     /**
@@ -388,7 +395,7 @@ public:
             std::is_arithmetic<T>::value,
             bool
     >
-    try_type_cast(T& result) const noexcept
+    try_as(T& result) const noexcept
     {
         if (composite_flags_.flag_is_raised(arg_flags::ALLOW_MIN_CONSTANT) &&
                 kcs::stringutils::strcmp(value_, "min") == 0)
@@ -416,7 +423,7 @@ public:
             !std::is_arithmetic<T>::value,
             bool
     >
-    try_type_cast(T& result) const noexcept
+    try_as(T& result) const noexcept
     {
         return kcs::type_casting::try_type_cast<T>(value_, result);
     }
@@ -454,11 +461,9 @@ public:
             {
                 if (colors_enable)
                 {
-                    kcs::system::set_ostream_text_attribute(
-                            os, kcs::system::text_attribute::LIGHT_RED);
+                    ksys::set_ostream_text_attribute(os, ksys::text_attribute::LIGHT_RED);
                     os << error_id << ": ";
-                    kcs::system::set_ostream_text_attribute(
-                            os, kcs::system::text_attribute::DEFAULT);
+                    ksys::set_ostream_text_attribute(os, ksys::text_attribute::DEFAULT);
                 }
                 else
                 {
@@ -472,11 +477,9 @@ public:
                      !composite_flags_.flag_is_raised(arg_flags::PRINT_ERROR_ID_ON_PATH_ERROR)) &&
                     colors_enable)
                 {
-                    kcs::system::set_ostream_text_attribute(
-                            os, kcs::system::text_attribute::LIGHT_RED);
+                    ksys::set_ostream_text_attribute(os, ksys::text_attribute::LIGHT_RED);
                     os << value_ << ":";
-                    kcs::system::set_ostream_text_attribute(
-                            os, kcs::system::text_attribute::DEFAULT);
+                    ksys::set_ostream_text_attribute(os, ksys::text_attribute::DEFAULT);
                     os << " " << error_message_ << std::endl;
                 }
                 else
@@ -495,15 +498,13 @@ private:
     /**
      * @brief       Allows knowing wether the value can be coverted to the specified type.
      * @return      If function was successful true is returned, otherwise false is returned.
-     * @note        If the construction of a tp object does not throw exceptions, the function does
-     *              not throw exception.
      */
     template<typename T>
     std::enable_if_t<
             !kcs::type_traits::is_path<T>::value,
             bool
     >
-    is_value_valid() noexcept(noexcept(T()))
+    is_value_valid()
     {
         if (std::is_arithmetic<T>::value)
         {
@@ -542,26 +543,25 @@ private:
     >
     is_value_valid() noexcept
     {
-        namespace stdfs = std::experimental::filesystem;
-    
         stdfs::path path(value_);
         bool success = true;
-        std::error_condition error_condition;
+        std::error_code error_code;
+        ksys::ft_t ft;
     
         if ((type_.flag_is_raised(arg_value_types::R_FILE) &&
-             !kcs::filesystem::can_current_process_read_file(path, error_condition)) ||
+             !ksys::access(path, ft = ksys::ft_t::REGULAR_FILE, ksys::am_t::READ, &error_code)) ||
             (type_.flag_is_raised(arg_value_types::W_FILE) &&
-             !kcs::filesystem::can_current_process_write_file(path, error_condition)) ||
-            (type_.flag_is_raised(arg_value_types::WC_FILE) &&
-             !kcs::filesystem::can_current_process_write_or_create_file(path, error_condition)) ||
+             !ksys::access(path, ksys::ft_t::REGULAR_FILE, ksys::am_t::WRITE, &error_code)) ||
             (type_.flag_is_raised(arg_value_types::X_FILE) &&
-             !kcs::filesystem::can_current_process_execute_file(path, error_condition)) ||
+             !ksys::access(path, ksys::ft_t::REGULAR_FILE, ksys::am_t::EXECUTE, &error_code)) ||
+            (type_.flag_is_raised(arg_value_types::C_FILE) &&
+             !ksys::access(path, ksys::ft_t::REGULAR_FILE, ksys::am_t::CREATE, &error_code)) ||
             (type_.flag_is_raised(arg_value_types::R_DIR) &&
-             !kcs::filesystem::can_current_process_read_dir(path, error_condition)) ||
+             !ksys::access(path, ft = ksys::ft_t::DIRECTORY, ksys::am_t::READ, &error_code)) ||
             (type_.flag_is_raised(arg_value_types::W_DIR) &&
-             !kcs::filesystem::can_current_process_write_dir(path, error_condition)) ||
+             !ksys::access(path, ksys::ft_t::DIRECTORY, ksys::am_t::WRITE, &error_code)) ||
             (type_.flag_is_raised(arg_value_types::X_DIR) &&
-             !kcs::filesystem::can_current_process_execute_dir(path, error_condition)))
+             !ksys::access(path, ksys::ft_t::DIRECTORY, ksys::am_t::EXECUTE, &error_code)))
         {
             success = false;
         }
@@ -570,15 +570,23 @@ private:
         {
             invalid_path_ = true;
             
-            if (error_condition.value() == EINVAL)
+            if (!error_code)
             {
-                error_message_ =
-                        kcs::type_casting::type_cast<string_type>("Not a regular file");
+                if (ft == ksys::ft_t::REGULAR_FILE)
+                {
+                    error_message_ =
+                            kcs::type_casting::type_cast<string_type>("Not a regular file");
+                }
+                else
+                {
+                    error_message_ =
+                            kcs::type_casting::type_cast<string_type>("Not a directory");
+                }
             }
             else
             {
                 error_message_ =
-                        kcs::type_casting::type_cast<string_type>(error_condition.message());
+                        kcs::type_casting::type_cast<string_type>(error_code.message());
             }
         }
     

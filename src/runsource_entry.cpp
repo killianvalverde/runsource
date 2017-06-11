@@ -18,20 +18,24 @@
 // Created by Killian on 22/05/17.
 //
 
-#include <unistd.h>
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 
-#include "program.hpp"
+#include "kcs/system.hpp"
 
+#include "runsource_entry.hpp"
+
+namespace stdch = std::chrono;
 namespace stdfs = std::experimental::filesystem;
+namespace ksys = kcs::system;
 namespace rs = runsource;
 
 
 namespace runsource {
 
 
-program::program(
+runsource_entry::runsource_entry(
         bool execute,
         rs::language language,
         rs::c_standard c_standard,
@@ -72,9 +76,9 @@ program::program(
 }
 
 
-int program::exec() const
+int runsource_entry::exec() const
 {
-    chdir(files_.front().parent_path().string().c_str());
+    ksys::chdir(files_.front().parent_path().string().c_str());
     
     switch (language_)
     {
@@ -103,7 +107,7 @@ int program::exec() const
 }
 
 
-bool program::is_c() const noexcept
+bool runsource_entry::is_c() const noexcept
 {
     for (auto& x : files_)
     {
@@ -117,7 +121,7 @@ bool program::is_c() const noexcept
 }
 
 
-bool program::is_cpp() const noexcept
+bool runsource_entry::is_cpp() const noexcept
 {
     for (auto& x : files_)
     {
@@ -131,7 +135,7 @@ bool program::is_cpp() const noexcept
 }
 
 
-bool program::is_bash() const noexcept
+bool runsource_entry::is_bash() const noexcept
 {
     for (auto& x : files_)
     {
@@ -145,7 +149,7 @@ bool program::is_bash() const noexcept
 }
 
 
-bool program::is_python() const noexcept
+bool runsource_entry::is_python() const noexcept
 {
     for (auto& x : files_)
     {
@@ -159,10 +163,10 @@ bool program::is_python() const noexcept
 }
 
 
-int program::gcc_build_c(std::string output_name, bool verbose) const
+int runsource_entry::gcc_build_c(std::string output_name, bool verbose) const
 {
-    std::clock_t start_time;
-    double total_duration;
+    stdch::steady_clock::time_point start_time;
+    stdch::duration<double> total_duration;
     int result;
     std::string command = "gcc ";
     
@@ -211,14 +215,17 @@ int program::gcc_build_c(std::string output_name, bool verbose) const
         }
     }
     
-    start_time = clock();
+    start_time = stdch::steady_clock::now();
     result = system(command.c_str());
-    total_duration = (clock() - start_time) / CLOCKS_PER_SEC;
+    total_duration = stdch::duration_cast<stdch::duration<double>>(
+            stdch::steady_clock::now() - start_time);
     
     if (verbose && result == 0)
     {
         std::cout << "C program build in "
-                  << std::setprecision(3) << total_duration
+                  << std::setprecision(3)
+                  << std::fixed
+                  << total_duration.count()
                   << " seconds"
                   << std::endl;
     }
@@ -227,14 +234,14 @@ int program::gcc_build_c(std::string output_name, bool verbose) const
 }
 
 
-int program::gcc_exec_c() const
+int runsource_entry::gcc_exec_c() const
 {
     std::string output_name = std::tmpnam(nullptr);
     std::string command;
     int build_result = gcc_build_c(output_name, false);
     int exec_result;
-    std::clock_t start_time;
-    double total_duration;
+    stdch::steady_clock::time_point start_time;
+    stdch::duration<double> total_duration;
     std::stringstream strstream;
     std::string strstream_str;
     
@@ -250,23 +257,26 @@ int program::gcc_exec_c() const
             command += x;
             command += ' ';
         }
-        
-        start_time = clock();
+    
+        start_time = stdch::steady_clock::now();
         exec_result = system(command.c_str());
-        total_duration = (clock() - start_time) / CLOCKS_PER_SEC;
+        total_duration = stdch::duration_cast<stdch::duration<double>>(
+                stdch::steady_clock::now() - start_time);
         
         strstream << "Process exited after "
-                  << std::setprecision(3) << total_duration
+                  << std::setprecision(3)
+                  << std::fixed
+                  << total_duration.count()
                   << " seconds with return value " << exec_result;
         
         strstream_str = strstream.str();
         
-        std::cout << "\n";
+        std::cout << std::endl;
         for (std::size_t i = 0; i < strstream_str.size(); i++)
         {
             std::cout << "-";
         }
-        std::cout << "\n"
+        std::cout << std::endl
                   << strstream_str
                   << std::endl;
         
@@ -281,10 +291,10 @@ int program::gcc_exec_c() const
 }
 
 
-int program::gcc_build_cpp(std::string output_name, bool verbose) const
+int runsource_entry::gcc_build_cpp(std::string output_name, bool verbose) const
 {
-    std::clock_t start_time;
-    double total_duration;
+    stdch::steady_clock::time_point start_time;
+    stdch::duration<double> total_duration;
     int result;
     std::string command = "g++ ";
     
@@ -337,14 +347,17 @@ int program::gcc_build_cpp(std::string output_name, bool verbose) const
         }
     }
     
-    start_time = clock();
+    start_time = stdch::steady_clock::now();
     result = system(command.c_str());
-    total_duration = (clock() - start_time) / CLOCKS_PER_SEC;
+    total_duration = stdch::duration_cast<stdch::duration<double>>(
+            stdch::steady_clock::now() - start_time);
     
     if (verbose && result == 0)
     {
         std::cout << "C++ program build in "
-                  << std::setprecision(3) << total_duration
+                  << std::setprecision(3)
+                  << std::fixed
+                  << total_duration.count()
                   << " seconds"
                   << std::endl;
     }
@@ -353,14 +366,14 @@ int program::gcc_build_cpp(std::string output_name, bool verbose) const
 }
 
 
-int program::gcc_exec_cpp() const
+int runsource_entry::gcc_exec_cpp() const
 {
     std::string output_name = std::tmpnam(nullptr);
     std::string command;
     int build_result = gcc_build_cpp(output_name, false);
     int exec_result;
-    std::clock_t start_time;
-    double total_duration;
+    stdch::steady_clock::time_point start_time;
+    stdch::duration<double> total_duration;
     std::stringstream strstream;
     std::string strstream_str;
     
@@ -376,23 +389,26 @@ int program::gcc_exec_cpp() const
             command += x;
             command += ' ';
         }
-        
-        start_time = clock();
+    
+        start_time = stdch::steady_clock::now();
         exec_result = system(command.c_str());
-        total_duration = (clock() - start_time) / CLOCKS_PER_SEC;
+        total_duration = stdch::duration_cast<stdch::duration<double>>(
+                stdch::steady_clock::now() - start_time);
         
         strstream << "Process exited after "
-                  << std::setprecision(3) << total_duration
+                  << std::setprecision(3)
+                  << std::fixed
+                  << total_duration.count()
                   << " seconds with return value " << exec_result;
         
         strstream_str = strstream.str();
         
-        std::cout << "\n";
+        std::cout << std::endl;
         for (std::size_t i = 0; i < strstream_str.size(); i++)
         {
             std::cout << "-";
         }
-        std::cout << "\n"
+        std::cout << std::endl
                   << strstream_str
                   << std::endl;
         
@@ -407,11 +423,11 @@ int program::gcc_exec_cpp() const
 }
 
 
-int program::exec_bash() const
+int runsource_entry::exec_bash() const
 {
     std::string command = "bash ";
-    std::clock_t start_time;
-    double total_duration;
+    stdch::steady_clock::time_point start_time;
+    stdch::duration<double> total_duration;
     int exec_result;
     std::stringstream strstream;
     std::string strstream_str;
@@ -430,24 +446,27 @@ int program::exec_bash() const
         command += ' ';
     }
     
-    start_time = clock();
+    start_time = stdch::steady_clock::now();
     exec_result = system(command.c_str());
-    total_duration = (clock() - start_time) / CLOCKS_PER_SEC;
+    total_duration = stdch::duration_cast<stdch::duration<double>>(
+            stdch::steady_clock::now() - start_time);
     
     if (exec_result == 0)
     {
         strstream << "Process exited after "
-                  << std::setprecision(3) << total_duration
+                  << std::setprecision(3)
+                  << std::fixed
+                  << total_duration.count()
                   << " seconds with return value " << exec_result;
         
         strstream_str = strstream.str();
         
-        std::cout << "\n";
+        std::cout << std::endl;
         for (std::size_t i = 0; i < strstream_str.size(); i++)
         {
             std::cout << "-";
         }
-        std::cout << "\n"
+        std::cout << std::endl
                   << strstream_str
                   << std::endl;
     }
@@ -456,11 +475,11 @@ int program::exec_bash() const
 }
 
 
-int program::exec_python() const
+int runsource_entry::exec_python() const
 {
     std::string command = "python ";
-    std::clock_t start_time;
-    double total_duration;
+    stdch::steady_clock::time_point start_time;
+    stdch::duration<double> total_duration;
     int exec_result;
     std::stringstream strstream;
     std::string strstream_str;
@@ -479,24 +498,27 @@ int program::exec_python() const
         command += ' ';
     }
     
-    start_time = clock();
+    start_time = stdch::steady_clock::now();
     exec_result = system(command.c_str());
-    total_duration = (clock() - start_time) / CLOCKS_PER_SEC;
+    total_duration = stdch::duration_cast<stdch::duration<double>>(
+            stdch::steady_clock::now() - start_time);
     
     if (exec_result == 0)
     {
         strstream << "Process exited after "
-                  << std::setprecision(3) << total_duration
+                  << std::setprecision(3)
+                  << std::fixed
+                  << total_duration.count()
                   << " seconds with return value " << exec_result;
     
         strstream_str = strstream.str();
     
-        std::cout << "\n";
+        std::cout << std::endl;
         for (std::size_t i = 0; i < strstream_str.size(); i++)
         {
             std::cout << "-";
         }
-        std::cout << "\n"
+        std::cout << std::endl
                   << strstream_str
                   << std::endl;
     }
@@ -505,19 +527,19 @@ int program::exec_python() const
 }
 
 
-std::unordered_set<std::string> program::c_extensions_ =
+std::unordered_set<std::string> runsource_entry::c_extensions_ =
         {".c"};
 
 
-std::unordered_set<std::string> program::cpp_extensions_ =
+std::unordered_set<std::string> runsource_entry::cpp_extensions_ =
         {".cpp", ".cc", ".C", ".CPP", ".c++", ".cp", ".cxx"};
 
 
-std::unordered_set<std::string> program::bash_extensions_ =
+std::unordered_set<std::string> runsource_entry::bash_extensions_ =
         {".sh"};
 
 
-std::unordered_set<std::string> program::python_extensions_ =
+std::unordered_set<std::string> runsource_entry::python_extensions_ =
         {".py"};
     
     

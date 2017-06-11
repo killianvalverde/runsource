@@ -201,6 +201,11 @@ public:
      */
     std::size_t get_short_keys_length() const noexcept override
     {
+        if (base_arg_type::description_is_empty())
+        {
+            return 0;
+        }
+        
         std::size_t keys_length = 0;
         
         for (auto& x : keys_vector_)
@@ -220,6 +225,11 @@ public:
      */
     std::size_t get_long_keys_length() const noexcept override
     {
+        if (base_arg_type::description_is_empty())
+        {
+            return 0;
+        }
+        
         std::size_t keys_length = 0;
         
         for (auto& x : keys_vector_)
@@ -289,18 +299,18 @@ public:
     
     /**
      * @brief       Print the argument information for help menu.
-     * @param       max_description_line_length : The maximum arguments description length that will
-     *              be printed in a single line.
-     * @param       newline_indentation : The indentation used when a newline is found.
-     * @param       keys_indentation : Indentation used to separate keys help descriptions during
-     *              the print.
+     * @param       args_indentation : Indentation used to print arguments help description.
+     * @param       max_line_length : The maximum description length that will be printed in a
+     *              single line.
+     * @param       newline_indentation : The indentation used when a newline is found in a
+     *              description.
      * @param       short_id_length : The maximum length of the short keys.
      * @param       long_id_length : The maximum length of the long keys.
      */
     void print_help_text(
-            std::size_t max_description_line_length,
+            std::size_t args_indentation,
+            std::size_t max_line_length,
             std::size_t newline_indentation,
-            std::size_t keys_indentation,
             std::size_t short_id_length,
             std::size_t long_id_length
     ) const override
@@ -315,7 +325,7 @@ public:
         std::size_t n_args_printed = 0;
         std::size_t i;
     
-        for (i = keys_indentation; i > 0; i--)
+        for (i = args_indentation; i > 0; i--)
         {
             os << (char_type)' ';
         }
@@ -382,14 +392,14 @@ public:
             }
         }
     
-        kcs::lowlevel::try_addml(&keys_indentation,
+        kcs::lowlevel::try_addml(&args_indentation,
                                  short_id_length,
                                  long_id_length);
         kcs::lowlevel::try_addm(&newline_indentation,
-                                keys_indentation);
-        base_arg_type::print_help_text(max_description_line_length,
+                                args_indentation);
+        base_arg_type::print_help_text(max_line_length,
                                        newline_indentation,
-                                       keys_indentation);
+                                       args_indentation);
     }
 
 protected:

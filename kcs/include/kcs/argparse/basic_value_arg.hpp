@@ -324,16 +324,22 @@ public:
     
     /**
      * @brief       Get first argument value.
-     * @param       nothrow_value : This parameter is only used to distinguish it from the first
-     *              version with an overloaded version.
-     * @return      If function was successful the first argument value is returned, if not an empty
-     *              argument value is returned.
+     * @param       default_value : The value used to construct an argument value if there isn't any
+     *              value.
+     * @return      If function was successful the first argument value is returned, otherwise an
+     *              argument value constructed with the default value is returned.
      */
-    const arg_value_type& get_front_value(const std::nothrow_t& nothrow_value) const
+    template<typename TpString_>
+    const arg_value_type& get_front_value(TpString_&& default_value) const
     {
         if (values_.empty())
         {
-            return get_arg_value_empty();
+            static arg_value_type default_arg_value;
+            default_arg_value = arg_value_type(std::forward<TpString_>(default_value),
+                                               arg_value_types::STRING,
+                                               string_type(),
+                                               base_arg_type::get_flags().get_value());
+            return default_arg_value;
         }
         
         return values_.front();
@@ -360,19 +366,26 @@ public:
     /**
      * @brief       Get the value in the specified position.
      * @param       index : Position of the element.
-     * @param       nothrow_value : This parameter is only used to distinguish it from the first
-     *              version with an overloaded version.
-     * @return      If function was successful the specified argument value is returned, if not an
-     *              empty argument value is returned.
+     * @param       default_value : The value used to construct an argument value if there isn't any
+     *              value.
+     * @return      If function was successful the argument value in the specified position is
+     *              returned, otherwise an argument value constructed with the default value is
+     *              returned.
      */
+    template<typename TpString_>
     const arg_value_type& get_value_at(
             std::size_t index,
-            const std::nothrow_t& nothrow_value
+            TpString_&& default_value
     ) const
     {
         if (values_.size() <= index)
         {
-            return get_arg_value_empty();
+            static arg_value_type default_arg_value;
+            default_arg_value = arg_value_type(std::forward<TpString_>(default_value),
+                                               arg_value_types::STRING,
+                                               string_type(),
+                                               base_arg_type::get_flags().get_value());
+            return default_arg_value;
         }
         
         return values_.at(index);
@@ -522,26 +535,6 @@ public:
                 }
             }
         }
-    }
-    
-    /**
-     * @brief       Get a constant empty argument value.
-     * @return      A constant empty argument value.
-     */
-    inline static const arg_value_type& get_arg_value_empty()
-    {
-        static const arg_value_type arg_value_empty = arg_value_type(string_type());
-        return arg_value_empty;
-    }
-    
-    /**
-     * @brief       Get a constant empty argument value collection.
-     * @return      A constant empty argument value collection.
-     */
-    inline static const vector_type<arg_value_type>& get_arg_values_empty()
-    {
-        static const vector_type<arg_value_type> arg_values_empty = vector_type<arg_value_type>();
-        return arg_values_empty;
     }
 
 protected:

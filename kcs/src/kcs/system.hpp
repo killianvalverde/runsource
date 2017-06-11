@@ -27,6 +27,7 @@
 #include "system/filesystem.hpp"
 #include "system/input_output.hpp"
 #include "system/process.hpp"
+#include "system/system_exception.hpp"
 
 
 namespace kcs {

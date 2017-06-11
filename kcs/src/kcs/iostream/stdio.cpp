@@ -16,7 +16,7 @@
 
 /**
  * @file        kcs/iostream/stdio.cpp
- * @brief       stdio fonctions source.
+ * @brief       stdio functions source.
  * @author      Killian
  * @date        2016/08/24 - 09:50
  */

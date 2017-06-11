@@ -43,68 +43,14 @@ namespace system {
  * @brief       Get the UID of the current process.
  * @return      The UID of the current process.
  */
-inline auto get_uid() noexcept
-{
-#if _POSIX_VERSION >= 200112L
-    return getuid();
-#else
-#error "system not supported"
-#endif
-}
+int get_uid();
 
 
 /**
  * @brief       Get the GID of the current process.
  * @return      The GID of the current process.
  */
-inline auto get_gid() noexcept
-{
-#if _POSIX_VERSION >= 200112L
-    return getgid();
-#else
-#error "system not supported"
-#endif
-}
-
-
-/**
- * @brief       Get the UID of the specified path.
- * @param       current_path : The path to get the UID.
- * @return      On success the UID of the sepcified path is returned, otherwise -1 is returned.
- */
-inline auto get_path_uid(const std::experimental::filesystem::path& current_path) noexcept
-{
-#if _POSIX_VERSION >= 200112L
-    struct stat stt;
-    if (stat(current_path.c_str(), &stt) == -1)
-    {
-        return (decltype(stt.st_uid))-1;
-    }
-    return stt.st_uid;
-#else
-#error "system not supported"
-#endif
-}
-
-
-/**
- * @brief       Get the GID of the specified path.
- * @param       current_path : The path to get the GID.
- * @return      On success the UID of the sepcified path is returned, otherwise -1 is returned.
- */
-inline auto get_path_gid(const std::experimental::filesystem::path& current_path) noexcept
-{
-#if _POSIX_VERSION >= 200112L
-    struct stat stt;
-    if (stat(current_path.c_str(), &stt) == -1)
-    {
-        return (decltype(stt.st_uid))-1;
-    }
-    return stt.st_gid;
-#else
-#error "system not supported"
-#endif
-}
+int get_gid();
 
 
 }

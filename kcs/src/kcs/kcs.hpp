@@ -26,7 +26,6 @@
 
 #include "argparse.hpp"
 #include "exception.hpp"
-#include "filesystem.hpp"
 #include "iostream.hpp"
 #include "lowlevel.hpp"
 #include "math.hpp"
