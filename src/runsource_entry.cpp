@@ -40,6 +40,7 @@ runsource_entry::runsource_entry(
         rs::language language,
         rs::c_standard c_standard,
         rs::cpp_standard cpp_standard,
+        bool optimize,
         rs::tool_chain tool_chain,
         std::vector<std::string> compiler_args,
         std::vector<std::string> program_args,
@@ -49,6 +50,7 @@ runsource_entry::runsource_entry(
         , language_(language)
         , c_standard_(c_standard)
         , cpp_standard_(cpp_standard)
+        , optimize_(optimize)
         , tool_chain_(tool_chain)
         , compiler_args_(std::move(compiler_args))
         , program_args_(std::move(program_args))
@@ -199,20 +201,25 @@ int runsource_entry::gcc_build_c(std::string output_name, bool verbose) const
     {
         if (c_standard_ == rs::c_standard::C89)
         {
-            command += "-std=c89";
+            command += "-std=c89 ";
         }
         else if (c_standard_ == rs::c_standard::C90)
         {
-            command += "-std=c90";
+            command += "-std=c90 ";
         }
         else if (c_standard_ == rs::c_standard::C99)
         {
-            command += "-std=c99";
+            command += "-std=c99 ";
         }
         else if (c_standard_ == rs::c_standard::C11)
         {
-            command += "-std=c11";
+            command += "-std=c11 ";
         }
+    }
+    
+    if (optimize_)
+    {
+        command += "-O3 ";
     }
     
     start_time = stdch::steady_clock::now();
@@ -327,24 +334,29 @@ int runsource_entry::gcc_build_cpp(std::string output_name, bool verbose) const
     {
         if (cpp_standard_ == rs::cpp_standard::CPP98)
         {
-            command += "-std=c++98";
+            command += "-std=c++98 ";
         }
         else if (cpp_standard_ == rs::cpp_standard::CPP03)
         {
-            command += "-std=c++03";
+            command += "-std=c++03 ";
         }
         else if (cpp_standard_ == rs::cpp_standard::CPP11)
         {
-            command += "-std=c++11";
+            command += "-std=c++11 ";
         }
         else if (cpp_standard_ == rs::cpp_standard::CPP14)
         {
-            command += "-std=c++14";
+            command += "-std=c++14 ";
         }
         else if (cpp_standard_ == rs::cpp_standard::CPP17)
         {
-            command += "-std=c++17";
+            command += "-std=c++17 ";
         }
+    }
+    
+    if (optimize_)
+    {
+        command += "-O3 ";
     }
     
     start_time = stdch::steady_clock::now();

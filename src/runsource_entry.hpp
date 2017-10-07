@@ -46,6 +46,7 @@ public:
             rs::language language,
             rs::c_standard c_standard,
             rs::cpp_standard cpp_standard,
+            bool optimize,
             rs::tool_chain tool_chain,
             std::vector<std::string> compiler_args,
             std::vector<std::string> program_args,
@@ -71,6 +72,7 @@ private:
     rs::language language_;
     rs::c_standard c_standard_;
     rs::cpp_standard cpp_standard_;
+    bool optimize_;
     rs::tool_chain tool_chain_;
     std::vector<std::string> compiler_args_;
     std::vector<std::string> program_args_;

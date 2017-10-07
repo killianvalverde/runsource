@@ -29,14 +29,14 @@ In order to compile this software you have to use a C++ revision equal or highte
 
 #### Standalone CMake Project ####
 
-When building Google Test as a standalone project, the typical workflow starts with:
+When building kcs as a standalone project, the typical workflow starts with:
 
     mkdir mybuild       # Create a directory to hold the build output.
     cd mybuild
     cmake ..            # Generate native build scripts.
 
 If you are on a \*nix system, you should now see a Makefile in the current directory.  
-Just type 'make' to build gtest.
+Just type 'make' to build kcs.
 
 #### Incorporating Into An Existing CMake Project ####
 

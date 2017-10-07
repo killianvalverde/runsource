@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     ap.add_key_arg({"--c++11"}, "Use C++11 standard when C++ language is selected.");
     ap.add_key_arg({"--c++14"}, "Use C++14 standard when C++ language is selected.");
     ap.add_key_arg({"--c++17"}, "Use C++17 standard when C++ language is selected.");
+    ap.add_key_arg({"--optimize"}, "Use the maximum optimization level available.");
     ap.add_help_arg({"--help"}, "Display this help and exit.");
     ap.add_gplv3_version_arg({"--version"}, "Output version information and exit", "1.0", "2017",
                              "Killian");
@@ -133,6 +134,7 @@ int main(int argc, char *argv[])
             language,
             c_standard,
             cpp_standard,
+            ap.arg_found("--optimize"),
             tool_chain,
             ap.get_arg_values_as<std::string>("--compiler-args"),
             ap.get_arg_values_as<std::string>("--program-args"),
