@@ -1,6 +1,6 @@
 ### runsource ###
 
-runsource is a simple C++ program whose main feature is compile source files, execute the produced 
+runsource is a simple C++ program whose main feature is compile source files, run the produced
 program and delete it. runsource was programmed with the objective to introduce it in the right 
 click context menu of file managers. In `context_menu` folder there are a configuration file for
 nemo. For more information use `./runsource --help` command.

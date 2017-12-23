@@ -18,102 +18,104 @@
 // Created by Killian on 22/05/17.
 //
 
-#include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
+#include <regex>
 
-#include "kcs/system.hpp"
+#include <kboost/kboost.hpp>
 
-#include "runsource_entry.hpp"
-
-namespace stdch = std::chrono;
-namespace stdfs = std::experimental::filesystem;
-namespace ksys = kcs::system;
-namespace rs = runsource;
+#include "program.hpp"
 
 
 namespace runsource {
 
 
-runsource_entry::runsource_entry(
-        bool execute,
-        rs::language language,
-        rs::c_standard c_standard,
-        rs::cpp_standard cpp_standard,
-        bool optimize,
-        rs::tool_chain tool_chain,
-        std::vector<std::string> compiler_args,
-        std::vector<std::string> program_args,
-        std::vector<stdfs::path> files
+namespace stdfs = std::experimental::filesystem;
+namespace rs = runsource;
+
+
+program::program(
+        bool exec,
+        rs::language lang,
+        rs::c_standard c_std,
+        rs::cpp_standard cpp_std,
+        bool optmz,
+        rs::tool_chain tool_chn,
+        std::string comp_args,
+        std::string prog_args,
+        bool monotonic_chrn,
+        std::vector<stdfs::path> fles
 )
-        : execute_(execute)
-        , language_(language)
-        , c_standard_(c_standard)
-        , cpp_standard_(cpp_standard)
-        , optimize_(optimize)
-        , tool_chain_(tool_chain)
-        , compiler_args_(std::move(compiler_args))
-        , program_args_(std::move(program_args))
-        , files_(std::move(files))
+        : exec_(exec)
+        , lang_(lang)
+        , c_std_(c_std)
+        , cpp_std_(cpp_std)
+        , optmz_(optmz)
+        , tool_chn_(tool_chn)
+        , comp_args_(std::move(comp_args))
+        , prog_args_(std::move(prog_args))
+        , monotonic_chrn_(monotonic_chrn)
+        , fles_(std::move(fles))
 {
-    if (language == rs::language::NIL)
+    if (lang == rs::language::NIL)
     {
         if (is_c())
         {
-            language_ = rs::language::C;
+            lang_ = rs::language::C;
         }
         else if (is_cpp())
         {
-            language_ = rs::language::CPP;
+            lang_ = rs::language::CPP;
         }
         else if (is_python())
         {
-            language_ = rs::language::PYTHON;
+            lang_ = rs::language::PYTHON;
         }
         else if (is_bash())
         {
-            language_ = rs::language::BASH;
+            lang_ = rs::language::BASH;
         }
     }
 }
 
 
-int runsource_entry::exec() const
+int program::execute() const
 {
-    ksys::chdir(files_.front().parent_path().string().c_str());
+    ksys::chdir(fles_.front().parent_path().c_str());
     
-    switch (language_)
+    switch (lang_)
     {
         case rs::language::C:
-            if (tool_chain_ == tool_chain::GCC)
+            if (tool_chn_ == tool_chain::GCC)
             {
-                return execute_ ? gcc_exec_c() : gcc_build_c(std::string(), true);
+                return exec_ ? gcc_execute_c() : gcc_build_c(std::string(), true);
             }
             break;
         
         case rs::language::CPP:
-            if (tool_chain_ == tool_chain::GCC)
+            if (tool_chn_ == tool_chain::GCC)
             {
-                return execute_ ? gcc_exec_cpp() : gcc_build_cpp(std::string(), true);
+                return exec_ ? gcc_execute_cpp() : gcc_build_cpp(std::string(), true);
             }
             break;
         
         case rs::language::BASH:
-            return exec_bash();
+            return execute_bash();
         
         case rs::language::PYTHON:
-            return exec_python();
+            return execute_python();
     }
     
     return -1;
 }
 
 
-bool runsource_entry::is_c() const noexcept
+bool program::is_c() const noexcept
 {
-    for (auto& x : files_)
+    for (auto& x : fles_)
     {
-        if (c_extensions_.count(x.extension()) == 0)
+        if (c_exts_.count(x.extension()) == 0)
         {
             return false;
         }
@@ -123,11 +125,11 @@ bool runsource_entry::is_c() const noexcept
 }
 
 
-bool runsource_entry::is_cpp() const noexcept
+bool program::is_cpp() const noexcept
 {
-    for (auto& x : files_)
+    for (auto& x : fles_)
     {
-        if (cpp_extensions_.count(x.extension()) == 0)
+        if (cpp_exts_.count(x.extension()) == 0)
         {
             return false;
         }
@@ -137,11 +139,11 @@ bool runsource_entry::is_cpp() const noexcept
 }
 
 
-bool runsource_entry::is_bash() const noexcept
+bool program::is_bash() const noexcept
 {
-    for (auto& x : files_)
+    for (auto& x : fles_)
     {
-        if (bash_extensions_.count(x.extension()) == 0 && x.has_extension())
+        if (bash_exts_.count(x.extension()) == 0 && x.has_extension())
         {
             return false;
         }
@@ -151,11 +153,11 @@ bool runsource_entry::is_bash() const noexcept
 }
 
 
-bool runsource_entry::is_python() const noexcept
+bool program::is_python() const noexcept
 {
-    for (auto& x : files_)
+    for (auto& x : fles_)
     {
-        if (python_extensions_.count(x.extension()) == 0)
+        if (python_exts_.count(x.extension()) == 0)
         {
             return false;
         }
@@ -165,15 +167,17 @@ bool runsource_entry::is_python() const noexcept
 }
 
 
-int runsource_entry::gcc_build_c(std::string output_name, bool verbose) const
+int program::gcc_build_c(const std::string& out_nme, bool verb) const
 {
-    stdch::steady_clock::time_point start_time;
-    stdch::duration<double> total_duration;
     int result;
     std::string command = "gcc ";
+    std::vector<std::string> libs_to_link;
+    ktime::monotonic_chrono monotonic_chrn;
     
-    for (auto& x : files_)
+    for (auto& x : fles_)
     {
+        add_c_libs_to_link_from_file(x, libs_to_link);
+        
         command += "\"";
         command += x.string();
         command += "\"";
@@ -181,58 +185,58 @@ int runsource_entry::gcc_build_c(std::string output_name, bool verbose) const
     }
     
     command += "-o ";
-    if (output_name.empty())
-    {
-        output_name = files_.front().string();
-        output_name = output_name.substr(0, output_name.find_last_of("."));
-    }
     command += "\"";
-    command += std::move(output_name);
+    command += (out_nme.empty()) ? fles_.front().stem().string() : out_nme;
     command += "\"";
     command += ' ';
     
-    for (auto& x : compiler_args_)
+    if (!comp_args_.empty())
+    {
+        command += comp_args_;
+        command += ' ';
+    }
+    
+    for (auto& x : libs_to_link)
     {
         command += x;
         command += ' ';
     }
     
-    if (c_standard_ != rs::c_standard::NIL)
+    if (c_std_ != rs::c_standard::NIL)
     {
-        if (c_standard_ == rs::c_standard::C89)
+        if (c_std_ == rs::c_standard::C89)
         {
             command += "-std=c89 ";
         }
-        else if (c_standard_ == rs::c_standard::C90)
+        else if (c_std_ == rs::c_standard::C90)
         {
             command += "-std=c90 ";
         }
-        else if (c_standard_ == rs::c_standard::C99)
+        else if (c_std_ == rs::c_standard::C99)
         {
             command += "-std=c99 ";
         }
-        else if (c_standard_ == rs::c_standard::C11)
+        else if (c_std_ == rs::c_standard::C11)
         {
             command += "-std=c11 ";
         }
     }
     
-    if (optimize_)
+    if (optmz_)
     {
         command += "-O3 ";
     }
     
-    start_time = stdch::steady_clock::now();
+    monotonic_chrn.start();
     result = system(command.c_str());
-    total_duration = stdch::duration_cast<stdch::duration<double>>(
-            stdch::steady_clock::now() - start_time);
+    monotonic_chrn.stop();
     
-    if (verbose && result == 0)
+    if (verb && result == 0)
     {
         std::cout << "C program build in "
                   << std::setprecision(3)
                   << std::fixed
-                  << total_duration.count()
+                  << monotonic_chrn
                   << " seconds"
                   << std::endl;
     }
@@ -241,16 +245,19 @@ int runsource_entry::gcc_build_c(std::string output_name, bool verbose) const
 }
 
 
-int runsource_entry::gcc_exec_c() const
+int program::gcc_execute_c() const
 {
-    std::string output_name = std::tmpnam(nullptr);
+    std::string output_name;
     std::string command;
-    int build_result = gcc_build_c(output_name, false);
+    int build_result;
     int exec_result;
-    stdch::steady_clock::time_point start_time;
-    stdch::duration<double> total_duration;
     std::stringstream strstream;
     std::string strstream_str;
+    ktime::monotonic_chrono monotonic_chrn;
+    
+    output_name = std::tmpnam(nullptr);
+    output_name += "runsource";
+    build_result = gcc_build_c(output_name, false);
     
     if (build_result == 0)
     {
@@ -259,21 +266,21 @@ int runsource_entry::gcc_exec_c() const
         command += "\"";
         command += ' ';
         
-        for (auto& x : program_args_)
+        if (!prog_args_.empty())
         {
-            command += x;
+            command += prog_args_;
             command += ' ';
         }
-    
-        start_time = stdch::steady_clock::now();
+        
+        monotonic_chrn.start();
         exec_result = system(command.c_str());
-        total_duration = stdch::duration_cast<stdch::duration<double>>(
-                stdch::steady_clock::now() - start_time);
+        monotonic_chrn.stop();
+        remove(output_name.c_str());
         
         strstream << "Process exited after "
                   << std::setprecision(3)
                   << std::fixed
-                  << total_duration.count()
+                  << monotonic_chrn
                   << " seconds with return value " << exec_result;
         
         strstream_str = strstream.str();
@@ -287,8 +294,6 @@ int runsource_entry::gcc_exec_c() const
                   << strstream_str
                   << std::endl;
         
-        remove(output_name.c_str());
-        
         return exec_result;
     }
     else
@@ -298,15 +303,17 @@ int runsource_entry::gcc_exec_c() const
 }
 
 
-int runsource_entry::gcc_build_cpp(std::string output_name, bool verbose) const
+int program::gcc_build_cpp(const std::string& out_nme, bool verb) const
 {
-    stdch::steady_clock::time_point start_time;
-    stdch::duration<double> total_duration;
     int result;
     std::string command = "g++ ";
+    std::vector<std::string> libs_to_link;
+    ktime::monotonic_chrono monotonic_chrn;
     
-    for (auto& x : files_)
+    for (auto& x : fles_)
     {
+        add_c_libs_to_link_from_file(x, libs_to_link);
+        
         command += "\"";
         command += x.string();
         command += "\"";
@@ -314,62 +321,62 @@ int runsource_entry::gcc_build_cpp(std::string output_name, bool verbose) const
     }
     
     command += "-o ";
-    if (output_name.empty())
-    {
-        output_name = files_.front().string();
-        output_name = output_name.substr(0, output_name.find_last_of("."));
-    }
     command += "\"";
-    command += std::move(output_name);
+    command += (out_nme.empty()) ? fles_.front().stem().string() : out_nme;
     command += "\"";
     command += ' ';
     
-    for (auto& x : compiler_args_)
+    if (!comp_args_.empty())
+    {
+        command += comp_args_;
+        command += ' ';
+    }
+    
+    for (auto& x : libs_to_link)
     {
         command += x;
         command += ' ';
     }
     
-    if (cpp_standard_ != rs::cpp_standard::NIL)
+    if (cpp_std_ != rs::cpp_standard::NIL)
     {
-        if (cpp_standard_ == rs::cpp_standard::CPP98)
+        if (cpp_std_ == rs::cpp_standard::CPP98)
         {
             command += "-std=c++98 ";
         }
-        else if (cpp_standard_ == rs::cpp_standard::CPP03)
+        else if (cpp_std_ == rs::cpp_standard::CPP03)
         {
             command += "-std=c++03 ";
         }
-        else if (cpp_standard_ == rs::cpp_standard::CPP11)
+        else if (cpp_std_ == rs::cpp_standard::CPP11)
         {
             command += "-std=c++11 ";
         }
-        else if (cpp_standard_ == rs::cpp_standard::CPP14)
+        else if (cpp_std_ == rs::cpp_standard::CPP14)
         {
             command += "-std=c++14 ";
         }
-        else if (cpp_standard_ == rs::cpp_standard::CPP17)
+        else if (cpp_std_ == rs::cpp_standard::CPP17)
         {
             command += "-std=c++17 ";
         }
     }
     
-    if (optimize_)
+    if (optmz_)
     {
         command += "-O3 ";
     }
     
-    start_time = stdch::steady_clock::now();
+    monotonic_chrn.start();
     result = system(command.c_str());
-    total_duration = stdch::duration_cast<stdch::duration<double>>(
-            stdch::steady_clock::now() - start_time);
+    monotonic_chrn.stop();
     
-    if (verbose && result == 0)
+    if (verb && result == 0)
     {
         std::cout << "C++ program build in "
                   << std::setprecision(3)
                   << std::fixed
-                  << total_duration.count()
+                  << monotonic_chrn
                   << " seconds"
                   << std::endl;
     }
@@ -378,16 +385,19 @@ int runsource_entry::gcc_build_cpp(std::string output_name, bool verbose) const
 }
 
 
-int runsource_entry::gcc_exec_cpp() const
+int program::gcc_execute_cpp() const
 {
-    std::string output_name = std::tmpnam(nullptr);
+    std::string output_name;
     std::string command;
-    int build_result = gcc_build_cpp(output_name, false);
+    int build_result;
     int exec_result;
-    stdch::steady_clock::time_point start_time;
-    stdch::duration<double> total_duration;
+    ktime::monotonic_chrono monotonic_chrn;
     std::stringstream strstream;
     std::string strstream_str;
+    
+    output_name = std::tmpnam(nullptr);
+    output_name += "runsource";
+    build_result = gcc_build_cpp(output_name, false);
     
     if (build_result == 0)
     {
@@ -396,21 +406,18 @@ int runsource_entry::gcc_exec_cpp() const
         command += "\"";
         command += ' ';
         
-        for (auto& x : program_args_)
-        {
-            command += x;
-            command += ' ';
-        }
+        command += prog_args_;
+        command += ' ';
     
-        start_time = stdch::steady_clock::now();
+        monotonic_chrn.start();
         exec_result = system(command.c_str());
-        total_duration = stdch::duration_cast<stdch::duration<double>>(
-                stdch::steady_clock::now() - start_time);
+        monotonic_chrn.stop();
+        remove(output_name.c_str());
         
         strstream << "Process exited after "
                   << std::setprecision(3)
                   << std::fixed
-                  << total_duration.count()
+                  << monotonic_chrn
                   << " seconds with return value " << exec_result;
         
         strstream_str = strstream.str();
@@ -423,8 +430,6 @@ int runsource_entry::gcc_exec_cpp() const
         std::cout << std::endl
                   << strstream_str
                   << std::endl;
-        
-        remove(output_name.c_str());
         
         return exec_result;
     }
@@ -435,16 +440,15 @@ int runsource_entry::gcc_exec_cpp() const
 }
 
 
-int runsource_entry::exec_bash() const
+int program::execute_bash() const
 {
     std::string command = "bash ";
-    stdch::steady_clock::time_point start_time;
-    stdch::duration<double> total_duration;
+    ktime::monotonic_chrono monotonic_chrn;
     int exec_result;
     std::stringstream strstream;
     std::string strstream_str;
     
-    for (auto& x : files_)
+    for (auto& x : fles_)
     {
         command += "\"";
         command += x.string();
@@ -452,23 +456,19 @@ int runsource_entry::exec_bash() const
         command += ' ';
     }
     
-    for (auto& x : program_args_)
-    {
-        command += x;
-        command += ' ';
-    }
+    command += prog_args_;
+    command += ' ';
     
-    start_time = stdch::steady_clock::now();
+    monotonic_chrn.start();
     exec_result = system(command.c_str());
-    total_duration = stdch::duration_cast<stdch::duration<double>>(
-            stdch::steady_clock::now() - start_time);
+    monotonic_chrn.stop();
     
     if (exec_result == 0)
     {
         strstream << "Process exited after "
                   << std::setprecision(3)
                   << std::fixed
-                  << total_duration.count()
+                  << monotonic_chrn
                   << " seconds with return value " << exec_result;
         
         strstream_str = strstream.str();
@@ -487,16 +487,15 @@ int runsource_entry::exec_bash() const
 }
 
 
-int runsource_entry::exec_python() const
+int program::execute_python() const
 {
     std::string command = "python ";
-    stdch::steady_clock::time_point start_time;
-    stdch::duration<double> total_duration;
+    ktime::monotonic_chrono monotonic_chrn;
     int exec_result;
     std::stringstream strstream;
     std::string strstream_str;
     
-    for (auto& x : files_)
+    for (auto& x : fles_)
     {
         command += "\"";
         command += x.string();
@@ -504,23 +503,19 @@ int runsource_entry::exec_python() const
         command += ' ';
     }
     
-    for (auto& x : program_args_)
-    {
-        command += x;
-        command += ' ';
-    }
+    command += prog_args_;
+    command += ' ';
     
-    start_time = stdch::steady_clock::now();
+    monotonic_chrn.start();
     exec_result = system(command.c_str());
-    total_duration = stdch::duration_cast<stdch::duration<double>>(
-            stdch::steady_clock::now() - start_time);
+    monotonic_chrn.stop();
     
     if (exec_result == 0)
     {
         strstream << "Process exited after "
                   << std::setprecision(3)
                   << std::fixed
-                  << total_duration.count()
+                  << monotonic_chrn
                   << " seconds with return value " << exec_result;
     
         strstream_str = strstream.str();
@@ -539,19 +534,49 @@ int runsource_entry::exec_python() const
 }
 
 
-std::unordered_set<std::string> runsource_entry::c_extensions_ =
+void program::add_c_libs_to_link_from_file(
+        const stdfs::path& fle_path,
+        std::vector<std::string>& libs_to_link
+) const
+{
+    std::regex rgx_pragma(R"(^#pragma\ comment\(lib,.+\)$)");
+    std::regex rgx_lib(R"(\".+\")");
+    std::smatch smatch;
+    std::string curr_line;
+    std::ifstream ifs;
+    
+    ifs.open(fle_path);
+    if (ifs)
+    {
+        while ((std::getline(ifs, curr_line), !ifs.eof()))
+        {
+            if (std::regex_match(curr_line, rgx_pragma) &&
+                std::regex_search(curr_line, smatch, rgx_lib) &&
+                std::find(libs_to_link.begin(), libs_to_link.end(), smatch.str()) ==
+                        libs_to_link.end())
+            {
+                libs_to_link.push_back(smatch.str());
+            }
+        }
+        
+        ifs.close();
+    }
+}
+
+
+std::unordered_set<std::string> program::c_exts_ =
         {".c"};
 
 
-std::unordered_set<std::string> runsource_entry::cpp_extensions_ =
+std::unordered_set<std::string> program::cpp_exts_ =
         {".cpp", ".cc", ".C", ".CPP", ".c++", ".cp", ".cxx"};
 
 
-std::unordered_set<std::string> runsource_entry::bash_extensions_ =
+std::unordered_set<std::string> program::bash_exts_ =
         {".sh"};
 
 
-std::unordered_set<std::string> runsource_entry::python_extensions_ =
+std::unordered_set<std::string> program::python_exts_ =
         {".py"};
     
     
