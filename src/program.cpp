@@ -256,7 +256,8 @@ int program::gcc_execute_c() const
     ktime::monotonic_chrono monotonic_chrn;
     
     output_name = std::tmpnam(nullptr);
-    output_name += "runsource";
+    output_name += "-runsource-";
+    output_name += std::to_string(ksys::get_pid());
     build_result = gcc_build_c(output_name, false);
     
     if (build_result == 0)
@@ -396,7 +397,8 @@ int program::gcc_execute_cpp() const
     std::string strstream_str;
     
     output_name = std::tmpnam(nullptr);
-    output_name += "runsource";
+    output_name += "-runsource-";
+    output_name += std::to_string(ksys::get_pid());
     build_result = gcc_build_cpp(output_name, false);
     
     if (build_result == 0)
