@@ -2,13 +2,13 @@
 
 Active=true
 
-Name=runsource
+Name=Benchmark
 
-Comment=Run a source file
+Comment=Benchmark a source file
 
 Quote=single
 
-Exec=gnome-terminal -x sh -c "runsource %F --pause"
+Exec=gnome-terminal -x sh -c "runsource %F --pause --cpu-chrono"
 
 Icon-Name=applications-development
 
