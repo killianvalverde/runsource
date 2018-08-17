@@ -8,7 +8,7 @@ Comment=Benchmark a source file
 
 Quote=single
 
-Exec=gnome-terminal -x sh -c "runsource %F --pause --cpu-chrono"
+Exec=gnome-terminal -x sh -c "runsource %F --pause --cpu-chrono --optimize"
 
 Icon-Name=applications-development
 
