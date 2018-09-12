@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     ap.add_help_arg({"--help"}, "Display this help and exit.");
     ap.add_gplv3_version_arg({"--version"}, "Output version information and exit", "1.0.0", "2017",
                              "Killian");
-    ap.add_foreign_arg("FILE", "File", "", {spdap::avt_t::R_FILE}, 1u, ~0u);
+    ap.add_keyless_arg("FILE", "File", "", {spdap::avt_t::R_FILE}, 1u, ~0u);
     
     ap.parse_args((unsigned int)argc, argv);
     
