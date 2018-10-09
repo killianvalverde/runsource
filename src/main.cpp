@@ -20,6 +20,7 @@
 #include <filesystem>
 
 #include <speed/speed.hpp>
+#include <speed/speed_alias.hpp>
 
 #include "program.hpp"
 
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
 {
     int res;
     
-    spdap::arg_parser ap("runsource");
+    spd::ap::arg_parser ap("runsource");
     
     ap.add_help_text("The folowind options are set by defautl: --exec --monotonic-chrono --gcc "
                              "--c11 --c++17",
@@ -40,10 +41,10 @@ int main(int argc, char *argv[])
     ap.add_key_arg({"--build", "-b"}, "Build the specified source file.");
     ap.add_key_value_arg({"--compiler-args", "-ca"},
                          "Forward the folowing arguments to the compiler.",
-                         {spdap::avt_t::STRING});
+                         {spd::ap::avt_t::STRING});
     ap.add_key_value_arg({"--program-args", "-pa"},
                          "Forward the folowing arguments to the produced program.",
-                         {spdap::avt_t::STRING});
+                         {spd::ap::avt_t::STRING});
     ap.add_key_arg({"--pause", "-p"}, "Pause the program before exit.");
     ap.add_key_arg({"--monotonic-chrono", "-mc"}, "Use a monotonic chrono.");
     ap.add_key_arg({"--cpu-chrono", "-cpu"}, "Use the process chrono.");
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
     ap.add_help_arg({"--help"}, "Display this help and exit.");
     ap.add_gplv3_version_arg({"--version"}, "Output version information and exit", "1.0.0", "2017",
                              "Killian");
-    ap.add_keyless_arg("FILE", "File", "", {spdap::avt_t::R_FILE}, 1u, ~0u);
+    ap.add_keyless_arg("FILE", "File", "", {spd::ap::avt_t::R_FILE}, 1u, ~0u);
     
     ap.parse_args((unsigned int)argc, argv);
     
@@ -110,7 +111,7 @@ int main(int argc, char *argv[])
     
     if (ap.arg_found("--pause"))
     {
-        spdsys::kbhit("Press key to continue...\n");
+        spd::sys::kbhit("Press key to continue...\n");
     }
     
     return res;

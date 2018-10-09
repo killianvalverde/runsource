@@ -27,6 +27,7 @@
 #include <regex>
 
 #include <speed/speed.hpp>
+#include <speed/speed_alias.hpp>
 
 #include "program.hpp"
 
@@ -70,7 +71,7 @@ program::program(
 
 int program::execute() const
 {
-    spdsys::chdir(fles_.front().parent_path().c_str());
+    spd::sys::chdir(fles_.front().parent_path().c_str());
     
     switch (lang_)
     {
@@ -160,7 +161,7 @@ int program::gcc_build_c(const std::string& out_nme, bool verb) const
     int result = -1;
     std::string command = "gcc ";
     std::unordered_set<std::string> libs_to_link;
-    spdtime::monotonic_chrono monotonic_chrn;
+    spd::tm::monotonic_chrono monotonic_chrn;
     
     for (auto& x : fles_)
     {
@@ -216,7 +217,7 @@ int program::gcc_build_c(const std::string& out_nme, bool verb) const
     }
     
     monotonic_chrn.start();
-    spdsys::execute_command(command.c_str(), &result);
+    spd::sys::execute_command(command.c_str(), &result);
     monotonic_chrn.stop();
     
     if (verb && result == 0)
@@ -226,7 +227,7 @@ int program::gcc_build_c(const std::string& out_nme, bool verb) const
                   << std::fixed
                   << monotonic_chrn
                   << " seconds"
-                  << spdios::newl;
+                  << spd::ios::newl;
     }
     
     return result;
@@ -241,12 +242,12 @@ int program::gcc_execute_c() const
     int exec_result = -1;
     std::stringstream strstream;
     std::string strstream_str;
-    spdtime::monotonic_chrono monotonic_chrn;
-    spdtime::child_cpu_chrono cpu_chrn;
+    spd::tm::monotonic_chrono monotonic_chrn;
+    spd::tm::child_cpu_chrono cpu_chrn;
     
-    output_name = spdsys::get_tmp_path();
+    output_name = spd::sys::get_tmp_path();
     output_name += "/runsource-";
-    output_name += std::to_string(spdsys::get_pid());
+    output_name += std::to_string(spd::sys::get_pid());
     build_result = gcc_build_c(output_name, false);
     
     if (build_result == 0)
@@ -264,7 +265,7 @@ int program::gcc_execute_c() const
         
         monotonic_chrn.start();
         cpu_chrn.start();
-        spdsys::execute_command(command.c_str(), &exec_result);
+        spd::sys::execute_command(command.c_str(), &exec_result);
         cpu_chrn.stop();
         monotonic_chrn.stop();
         remove(output_name.c_str());
@@ -288,14 +289,14 @@ int program::gcc_execute_c() const
         
         strstream_str = strstream.str();
         
-        std::cout << spdios::newl;
+        std::cout << spd::ios::newl;
         for (std::size_t i = 0; i < strstream_str.size(); i++)
         {
             std::cout << "-";
         }
-        std::cout << spdios::newl
+        std::cout << spd::ios::newl
                   << strstream_str
-                  << spdios::newl;
+                  << spd::ios::newl;
         
         return exec_result;
     }
@@ -311,7 +312,7 @@ int program::gcc_build_cpp(const std::string& out_nme, bool verb) const
     int result = -1;
     std::string command = "g++ ";
     std::unordered_set<std::string> libs_to_link;
-    spdtime::monotonic_chrono monotonic_chrn;
+    spd::tm::monotonic_chrono monotonic_chrn;
     
     for (auto& x : fles_)
     {
@@ -375,7 +376,7 @@ int program::gcc_build_cpp(const std::string& out_nme, bool verb) const
     }
     
     monotonic_chrn.start();
-    spdsys::execute_command(command.c_str(), &result);
+    spd::sys::execute_command(command.c_str(), &result);
     monotonic_chrn.stop();
     
     if (verb && result == 0)
@@ -385,7 +386,7 @@ int program::gcc_build_cpp(const std::string& out_nme, bool verb) const
                   << std::fixed
                   << monotonic_chrn
                   << " seconds"
-                  << spdios::newl;
+                  << spd::ios::newl;
     }
     
     return result;
@@ -400,12 +401,12 @@ int program::gcc_execute_cpp() const
     int exec_result = -1;
     std::stringstream strstream;
     std::string strstream_str;
-    spdtime::monotonic_chrono monotonic_chrn;
-    spdtime::child_cpu_chrono cpu_chrn;
+    spd::tm::monotonic_chrono monotonic_chrn;
+    spd::tm::child_cpu_chrono cpu_chrn;
     
-    output_name = spdsys::get_tmp_path();
+    output_name = spd::sys::get_tmp_path();
     output_name += "/runsource-";
-    output_name += std::to_string(spdsys::get_pid());
+    output_name += std::to_string(spd::sys::get_pid());
     build_result = gcc_build_cpp(output_name, false);
     
     if (build_result == 0)
@@ -420,7 +421,7 @@ int program::gcc_execute_cpp() const
     
         monotonic_chrn.start();
         cpu_chrn.start();
-        spdsys::execute_command(command.c_str(), &exec_result);
+        spd::sys::execute_command(command.c_str(), &exec_result);
         cpu_chrn.stop();
         monotonic_chrn.stop();
         remove(output_name.c_str());
@@ -444,14 +445,14 @@ int program::gcc_execute_cpp() const
         
         strstream_str = strstream.str();
         
-        std::cout << spdios::newl;
+        std::cout << spd::ios::newl;
         for (std::size_t i = 0; i < strstream_str.size(); i++)
         {
             std::cout << "-";
         }
-        std::cout << spdios::newl
+        std::cout << spd::ios::newl
                   << strstream_str
-                  << spdios::newl;
+                  << spd::ios::newl;
         
         return exec_result;
     }
@@ -468,8 +469,8 @@ int program::execute_bash() const
     int exec_result;
     std::stringstream strstream;
     std::string strstream_str;
-    spdtime::monotonic_chrono monotonic_chrn;
-    spdtime::child_cpu_chrono cpu_chrn;
+    spd::tm::monotonic_chrono monotonic_chrn;
+    spd::tm::child_cpu_chrono cpu_chrn;
     
     for (auto& x : fles_)
     {
@@ -510,14 +511,14 @@ int program::execute_bash() const
         
         strstream_str = strstream.str();
         
-        std::cout << spdios::newl;
+        std::cout << spd::ios::newl;
         for (std::size_t i = 0; i < strstream_str.size(); i++)
         {
             std::cout << "-";
         }
-        std::cout << spdios::newl
+        std::cout << spd::ios::newl
                   << strstream_str
-                  << spdios::newl;
+                  << spd::ios::newl;
     }
     
     return exec_result;
@@ -530,8 +531,8 @@ int program::execute_python() const
     int exec_result;
     std::stringstream strstream;
     std::string strstream_str;
-    spdtime::monotonic_chrono monotonic_chrn;
-    spdtime::child_cpu_chrono cpu_chrn;
+    spd::tm::monotonic_chrono monotonic_chrn;
+    spd::tm::child_cpu_chrono cpu_chrn;
     
     for (auto& x : fles_)
     {
@@ -572,14 +573,14 @@ int program::execute_python() const
     
         strstream_str = strstream.str();
     
-        std::cout << spdios::newl;
+        std::cout << spd::ios::newl;
         for (std::size_t i = 0; i < strstream_str.size(); i++)
         {
             std::cout << "-";
         }
-        std::cout << spdios::newl
+        std::cout << spd::ios::newl
                   << strstream_str
-                  << spdios::newl;
+                  << spd::ios::newl;
     }
     
     return exec_result;
