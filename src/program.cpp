@@ -71,7 +71,7 @@ program::program(
 
 int program::execute() const
 {
-    spd::sys::chdir(fles_.front().parent_path().c_str());
+    spd::sys::fsys::chdir(fles_.front().parent_path().c_str());
     
     switch (lang_)
     {
@@ -217,7 +217,7 @@ int program::gcc_build_c(const std::string& out_nme, bool verb) const
     }
     
     monotonic_chrn.start();
-    spd::sys::execute_command(command.c_str(), &result);
+    spd::sys::proc::execute_command(command.c_str(), &result);
     monotonic_chrn.stop();
     
     if (verb && result == 0)
@@ -245,9 +245,9 @@ int program::gcc_execute_c() const
     spd::tm::monotonic_chrono monotonic_chrn;
     spd::tm::child_cpu_chrono cpu_chrn;
     
-    output_name = spd::sys::get_tmp_path();
+    output_name = spd::sys::fsys::get_tmp_path();
     output_name += "/runsource-";
-    output_name += std::to_string(spd::sys::get_pid());
+    output_name += std::to_string(spd::sys::proc::get_pid());
     build_result = gcc_build_c(output_name, false);
     
     if (build_result == 0)
@@ -265,7 +265,7 @@ int program::gcc_execute_c() const
         
         monotonic_chrn.start();
         cpu_chrn.start();
-        spd::sys::execute_command(command.c_str(), &exec_result);
+        spd::sys::proc::execute_command(command.c_str(), &exec_result);
         cpu_chrn.stop();
         monotonic_chrn.stop();
         remove(output_name.c_str());
@@ -376,7 +376,7 @@ int program::gcc_build_cpp(const std::string& out_nme, bool verb) const
     }
     
     monotonic_chrn.start();
-    spd::sys::execute_command(command.c_str(), &result);
+    spd::sys::proc::execute_command(command.c_str(), &result);
     monotonic_chrn.stop();
     
     if (verb && result == 0)
@@ -404,9 +404,9 @@ int program::gcc_execute_cpp() const
     spd::tm::monotonic_chrono monotonic_chrn;
     spd::tm::child_cpu_chrono cpu_chrn;
     
-    output_name = spd::sys::get_tmp_path();
+    output_name = spd::sys::fsys::get_tmp_path();
     output_name += "/runsource-";
-    output_name += std::to_string(spd::sys::get_pid());
+    output_name += std::to_string(spd::sys::proc::get_pid());
     build_result = gcc_build_cpp(output_name, false);
     
     if (build_result == 0)
@@ -421,7 +421,7 @@ int program::gcc_execute_cpp() const
     
         monotonic_chrn.start();
         cpu_chrn.start();
-        spd::sys::execute_command(command.c_str(), &exec_result);
+        spd::sys::proc::execute_command(command.c_str(), &exec_result);
         cpu_chrn.stop();
         monotonic_chrn.stop();
         remove(output_name.c_str());

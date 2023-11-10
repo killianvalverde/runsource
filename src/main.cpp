@@ -1,5 +1,5 @@
 /* runsource - Run sources easily.
- * Copyright (C) 2017-2018 Killian Poulaud.
+ * Copyright (C) 2017-2023 Killian Poulaud.
  *
  * This file is part of runsource.
  *
@@ -33,10 +33,6 @@ int main(int argc, char *argv[])
     
     spd::ap::arg_parser ap("runsource");
     
-    ap.add_help_text("The folowind options are set by defautl: --exec --monotonic-chrono --gcc "
-                             "--c11 --c++17",
-                     {"--help"});
-    ap.add_help_text("Options:", {"--help"});
     ap.add_key_arg({"--exec", "-e"}, "Execute the specified source file.");
     ap.add_key_arg({"--build", "-b"}, "Build the specified source file.");
     ap.add_key_value_arg({"--compiler-args", "-ca"},
@@ -66,8 +62,12 @@ int main(int argc, char *argv[])
     ap.add_key_arg({"--optimize"}, "Use the maximum optimization level available.");
     ap.add_help_arg({"--help"}, "Display this help and exit.");
     ap.add_gplv3_version_arg({"--version"}, "Output version information and exit", "1.0.0", "2017",
-                             "Killian");
+                             "Killian Valverde");
     ap.add_keyless_arg("FILE", "File", "", {spd::ap::avt_t::R_FILE}, 1u, ~0u);
+    ap.add_help_text("");
+    ap.add_help_text("The folowind options are set by defautl: --exec --monotonic-chrono --gcc "
+                             "--c11 --c++17",
+                     {"--help"});
     
     ap.parse_args((unsigned int)argc, argv);
     
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     
     if (ap.arg_found("--pause"))
     {
-        spd::sys::kbhit("Press key to continue...\n");
+        spd::sys::term::kbhit("Press key to continue...\n");
     }
     
     return res;
