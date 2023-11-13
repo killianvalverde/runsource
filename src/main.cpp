@@ -1,5 +1,5 @@
 /* runsource - Run sources easily.
- * Copyright (C) 2017-2023 Killian Poulaud.
+ * Copyright (C) 2017-2023 Killian Valverde.
  *
  * This file is part of runsource.
  *
